@@ -35,7 +35,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @XmlRootElement
-@Table(name = "Registrant", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@Table(name = "Product", uniqueConstraints = @UniqueConstraint(columnNames = "id"))
 public class Product implements Serializable {
     /** Default value included to remove warning. Remove or modify at will. **/
     private static final long serialVersionUID = 1L;
