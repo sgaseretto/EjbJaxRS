@@ -1,0 +1,5 @@
+py/pol/una/ii/pw/util/Resources.class
+py/pol/una/ii/pw/data/MemberRepository.class
+py/pol/una/ii/pw/service/MemberRegistration.class
+py/pol/una/ii/pw/model/Member.class
+py/pol/una/ii/pw/data/MemberListProducer.class
