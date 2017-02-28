@@ -1,3 +1,4 @@
+
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Member.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/util/Resources.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Product.java
@@ -6,3 +7,18 @@
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Provider.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/service/MemberRegistration.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/MemberListProducer.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/util/Resources.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/service/ProductRegistration.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Member.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/ProviderRepository.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/MemberListProducer.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/ProviderListProducer.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/ProductListProducer.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/MemberRepository.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Product.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Provider.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/data/ProductRepository.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/model/Customer.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/service/MemberRegistration.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/ejb/src/main/java/py/pol/una/ii/pw/service/ProviderRegistration.java
+

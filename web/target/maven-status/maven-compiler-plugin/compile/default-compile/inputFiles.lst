@@ -1,4 +1,13 @@
+<<<<<<< HEAD
 /home/cristhianjbd/Escritorio/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/controller/MemberController.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/MemberResourceRESTService.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/util/WebResources.java
 /home/cristhianjbd/Escritorio/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/JaxRsActivator.java
+=======
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/JaxRsActivator.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/util/WebResources.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/MemberResourceRESTService.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/ProviderResourceRESTService.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/controller/MemberController.java
+/Users/sgaseretto/Facultad/11vo semestre/Backend/Tarea 01/EjbJaxRS/web/src/main/java/py/pol/una/ii/pw/rest/ProductResourceRESTService.java
+>>>>>>> c34d3c4e3e64c4cb9b54b9795fc39f299ac058ed
