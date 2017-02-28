@@ -16,8 +16,7 @@
  */
 package py.pol.una.ii.pw.service;
 
-
-import py.pol.una.ii.pw.model.Provider;
+import py.pol.una.ii.pw.model.Customer;
 
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -28,7 +27,7 @@ import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
 @Stateless
-public class ProviderRegistration {
+public class CustomerRegistration {
 
     @Inject
     private Logger log;
@@ -37,26 +36,25 @@ public class ProviderRegistration {
     private EntityManager em;
 
     @Inject
-    private Event<Provider> providerEventSrc;
+    private Event<Customer> customerEventSrc;
 
-    public void register(Provider provider) throws Exception {
-        log.info("Registering " + provider.getName());
-        em.persist(provider);
-        providerEventSrc.fire(provider);
+    public void register(Customer customer) throws Exception {
+        log.info("Registering " + customer.getName());
+        em.persist(customer);
+        customerEventSrc.fire(customer);
     }
     
-    public void update(Provider provider) throws Exception {
-        log.info("Updating " + provider.getName());
+    public void update(Customer customer) throws Exception {
+        log.info("Updating " + customer.getName());
         
-        em.merge(provider);
+        em.merge(customer);
         em.flush();
-        providerEventSrc.fire(provider);
+        customerEventSrc.fire(customer);
     }
     
-    public void delete(Provider provider) throws Exception {
-        log.info("Updating " + provider.getName());
-        em.remove(em.contains(provider) ? provider : em.merge(provider));
+    public void delete(Customer customer) throws Exception {
+        log.info("Updating " + customer.getName());
+        em.remove(em.contains(customer) ? customer : em.merge(customer));
         em.flush();
     }
 }
-

@@ -43,18 +43,18 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import py.pol.una.ii.pw.data.ProviderRepository;
-import py.pol.una.ii.pw.model.Provider;
-import py.pol.una.ii.pw.service.ProviderRegistration;
+import py.pol.una.ii.pw.data.CustomerRepository;
+import py.pol.una.ii.pw.model.Customer;
+import py.pol.una.ii.pw.service.CustomerRegistration;
 
 /**
  * JAX-RS Example
  * <p/>
  * This class produces a RESTful service to read/write the contents of the members table.
  */
-@Path("/providers")
+@Path("/customers")
 @RequestScoped
-public class ProviderResourceRESTService {
+public class CustomerResourceRESTService {
     @Inject
     private Logger log;
 
@@ -62,26 +62,62 @@ public class ProviderResourceRESTService {
     private Validator validator;
 
     @Inject
-    private ProviderRepository repository;
+    private CustomerRepository repository;
 
     @Inject
-    ProviderRegistration registration;
+    CustomerRegistration registration;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Provider> listAllMembers() {
+    public List<Customer> listAllMembers() {
         return repository.findAllOrderedByName();
     }
 
     @GET
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Provider lookupMemberById(@PathParam("id") long id) {
-        Provider provider = repository.findById(id);
-        if (provider == null) {
+    public Customer lookupCustomerById(@PathParam("id") long id) {
+        Customer customer = repository.findById(id);
+        if (customer == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        return provider;
+        return customer;
+    }
+    
+    @PUT
+    @Path("/{id:[0-9][0-9]*}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Customer UpdateCustomer(@PathParam("id") long id,Customer customer) throws Exception{
+        	validateCustomer(customer);
+       
+        	customer.setId(id);
+            registration.update(customer);
+            
+            return customer;
+    	
+    }
+    
+    @DELETE
+    @Path("/{id:[0-9][0-9]*}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Customer DeleteCustomer(@PathParam("id") long id) throws Exception{
+    	Customer customer = repository.findById(id);
+    	try{
+    	
+    	  if (customer == null) {
+              throw new WebApplicationException(Response.Status.NOT_FOUND);
+          }
+    	
+    	
+    	registration.delete(customer);
+    	log.info("Updating " + customer.getName());
+    	}
+    	catch(Exception e){
+    	}
+    	
+    	
+    	return customer;
+    	
     }
 
     /**
@@ -91,15 +127,15 @@ public class ProviderResourceRESTService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createMember(Provider provider) {
+    public Response createMember(Customer customer) {
 
         Response.ResponseBuilder builder = null;
 
         try {
             // Validates member using bean validation
-            validateProvider(provider);
+            validateCustomer(customer);
 
-            registration.register(provider);
+            registration.register(customer);
 
             // Create an "ok" response
             builder = Response.ok();
@@ -121,51 +157,19 @@ public class ProviderResourceRESTService {
         return builder.build();
     }
     
-    @PUT
-    @Path("/{id:[0-9][0-9]*}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Provider UpdateProvider(@PathParam("id") long id,Provider provider) throws Exception{
-        	validateProvider(provider);
-       
-        	provider.setId(id);
-            registration.update(provider);
-            
-            return provider;	
-    }
-    
-    @DELETE
-    @Path("/{id:[0-9][0-9]*}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Provider DeleteProvider(@PathParam("id") long id) throws Exception{
-    	Provider provider = repository.findById(id);
-    	try{
-    	  if (provider == null) {
-              throw new WebApplicationException(Response.Status.NOT_FOUND);
-          }
-    	registration.delete(provider);
-    	log.info("Updating " + provider.getName());
-    	}
-    	catch(Exception e){
-    	}
-    	
-    	
-    	return provider;
-    	
-    }
-    
     @GET
     @Path("/data")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Provider> searchProvider(@QueryParam("name") String name, @QueryParam("email") String email ){
+    public List<Customer> searchMember(@QueryParam("name") String name, @QueryParam("email") String email ){
     	log.info("name " + name);
     	log.info("email " + email);
-    	List<Provider> provider = repository.findByNameAndEmail(name,email);
-    	log.info("lista" + provider);
+    	List<Customer> customers = repository.findByNameAndEmail(name,email);
+    	log.info("lista" + customers);
     	
     	
-    	return provider;
+    	return customers;
     }
-
+    
 
     /**
      * <p>
@@ -181,16 +185,16 @@ public class ProviderResourceRESTService {
      * @throws ConstraintViolationException If Bean Validation errors exist
      * @throws ValidationException If member with the same email already exists
      */
-    private void validateProvider(Provider provider) throws ConstraintViolationException, ValidationException {
+    private void validateCustomer(Customer customer) throws ConstraintViolationException, ValidationException {
         // Create a bean validator and check for issues.
-        Set<ConstraintViolation<Provider>> violations = validator.validate(provider);
+        Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
 
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
         }
 
         // Check the uniqueness of the email address
-        if (emailAlreadyExists(provider.getEmail())) {
+        if (emailAlreadyExists(customer.getEmail())) {
             throw new ValidationException("Unique Email Violation");
         }
     }
@@ -222,13 +226,12 @@ public class ProviderResourceRESTService {
      * @return True if the email already exists, and false otherwise
      */
     public boolean emailAlreadyExists(String email) {
-        Provider provider = null;
+        Customer customer = null;
         try {
-            provider = repository.findByEmail(email);
+            customer = repository.findByEmail(email);
         } catch (NoResultException e) {
             // ignore
         }
-        return provider != null;
+        return customer != null;
     }
 }
-

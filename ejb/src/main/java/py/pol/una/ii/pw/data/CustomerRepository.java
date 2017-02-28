@@ -25,58 +25,57 @@ import javax.persistence.criteria.Root;
 
 import java.util.List;
 
-
-import py.pol.una.ii.pw.model.Provider;
+import py.pol.una.ii.pw.model.Customer;
 
 @ApplicationScoped
-public class ProviderRepository {
+public class CustomerRepository {
 
     @Inject
     private EntityManager em;
 
-    public Provider findById(Long id) {
-        return em.find(Provider.class, id);
+    public Customer findById(Long id) {
+        return em.find(Customer.class, id);
     }
 
-    public Provider findByEmail(String email) {
+    public Customer findByEmail(String email) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
+        CriteriaQuery<Customer> criteria = cb.createQuery(Customer.class);
+        Root<Customer> customer = criteria.from(Customer.class);
         // Swap criteria statements if you would like to try out type-safe criteria queries, a new
         // feature in JPA 2.0
-        // criteria.select(member).where(cb.equal(member.get(Member_.email), email));
-        criteria.select(provider).where(cb.equal(provider.get("email"), email));
+        // criteria.select(customer).where(cb.equal(customer.get(Customer.email), email));
+        criteria.select(customer).where(cb.equal(customer.get("email"), email));
         return em.createQuery(criteria).getSingleResult();
     }
     
-    public List<Provider> findByNameAndEmail(String name,String email) {
+    public List<Customer> findByNameAndEmail(String name,String email) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
+        CriteriaQuery<Customer> criteria = cb.createQuery(Customer.class);
+        Root<Customer> customer = criteria.from(Customer.class);
         // Swap criteria statements if you would like to try out type-safe criteria queries, a new
         // feature in JPA 2.0
         // criteria.select(customer).where(cb.equal                m (customer.get(Customer.email), email));
         if(name==null){
-        	 criteria.select(provider).where(cb.equal(provider.get("email"), email));
+        	 criteria.select(customer).where(cb.equal(customer.get("email"), email));
         }
         else if(email==null){
-        	criteria.select(provider).where(cb.equal(provider.get("name"), name));
+        	criteria.select(customer).where(cb.equal(customer.get("name"), name));
         }
         else if(name != null && email!=null){
-        criteria.select(provider).where(cb.equal(provider.get("name"), name),cb.equal(provider.get("email"), email));
+        criteria.select(customer).where(cb.equal(customer.get("name"), name),cb.equal(customer.get("email"), email));
         }
         return em.createQuery(criteria).getResultList();
     }
 
 
-    public List<Provider> findAllOrderedByName() {
+    public List<Customer> findAllOrderedByName() {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
+        CriteriaQuery<Customer> criteria = cb.createQuery(Customer.class);
+        Root<Customer> customer = criteria.from(Customer.class);
         // Swap criteria statements if you would like to try out type-safe criteria queries, a new
         // feature in JPA 2.0
-        // criteria.select(provider).orderBy(cb.asc(provider.get(Provider_.name)));
-        criteria.select(provider).orderBy(cb.asc(provider.get("name")));
+        // criteria.select(customer).orderBy(cb.asc(customer.get(Customer.name)));
+        criteria.select(customer).orderBy(cb.asc(customer.get("name")));
         return em.createQuery(criteria).getResultList();
     }
 }
