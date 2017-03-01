@@ -42,4 +42,18 @@ public class ProductRegistration {
         em.persist(product);
         productEventSrc.fire(product);
     }
+    
+    public void update(Product producto) throws Exception {
+        log.info("Updating " + producto.getName());
+        
+        em.merge(producto);
+        em.flush();
+        productEventSrc.fire(producto);
+    }
+    
+    public void delete(Product producto) throws Exception {
+        log.info("Deleting " + producto.getName());
+        em.remove(em.contains(producto) ? producto : em.merge(producto));
+        em.flush();
+    }
 }

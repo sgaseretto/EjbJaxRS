@@ -47,19 +47,18 @@ public class Product implements Serializable {
 
 
     @NotNull
-    @Size(min = 0)
     @Column(name = "price_value")
     private double price;
     
     
-    @NotNull
-    @Size(min = 0)
-    @Column(name = "cantidad_disponible")
-    private Integer cantidad;
+//    @NotNull
+//    @Column(name = "cantidad_disponible")
+//    private Integer cantidad;
     
     
     @NotNull
     @Size(min = 1, max = 25)
+    @Column(name = "descripcion")
     private String descripcion;
 
 
@@ -93,14 +92,14 @@ public class Product implements Serializable {
 	}
 
 
-	public Integer getCantidad() {
-		return cantidad;
-	}
-
-
-	public void setCantidad(Integer cantidad) {
-		this.cantidad = cantidad;
-	}
+//	public Integer getCantidad() {
+//		return cantidad;
+//	}
+//
+//
+//	public void setCantidad(Integer cantidad) {
+//		this.cantidad = cantidad;
+//	}
 
 
 	public String getDescripcion() {

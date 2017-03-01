@@ -24,6 +24,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
+import py.pol.una.ii.pw.model.Customer;
 import py.pol.una.ii.pw.model.Product;
 
 @ApplicationScoped
@@ -45,6 +46,25 @@ public class ProductRepository {
         // criteria.select(member).where(cb.equal(member.get(Member_.email), email));
         criteria.select(product).where(cb.equal(product.get("name"), name));
         return em.createQuery(criteria).getSingleResult();
+    }
+    
+    public List<Product> findByNameAndDescription(String name,String descripcion) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Product> criteria = cb.createQuery(Product.class);
+        Root<Product> producto = criteria.from(Product.class);
+        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
+        // feature in JPA 2.0
+        // criteria.select(producto).where(cb.equal                m (producto.get(Product.descripcion), descripcion));
+        if(name==null){
+        	 criteria.select(producto).where(cb.equal(producto.get("descripcion"), descripcion));
+        }
+        else if(descripcion==null){
+        	criteria.select(producto).where(cb.equal(producto.get("name"), name));
+        }
+        else if(name != null && descripcion!=null){
+        criteria.select(producto).where(cb.equal(producto.get("name"), name),cb.equal(producto.get("descripcion"), descripcion));
+        }
+        return em.createQuery(criteria).getResultList();
     }
 
     public List<Product> findAllOrderedByName() {
