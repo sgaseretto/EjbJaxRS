@@ -51,16 +51,12 @@ public class Product implements Serializable {
     private double price;
     
     
-//    @NotNull
-//    @Column(name = "cantidad_disponible")
-//    private Integer cantidad;
-    
     
     @NotNull
     @Size(min = 1, max = 25)
     @Column(name = "descripcion")
     private String descripcion;
-
+    
 
 	public Long getId() {
 		return id;
@@ -90,16 +86,6 @@ public class Product implements Serializable {
 	public void setPrice(double price) {
 		this.price = price;
 	}
-
-
-//	public Integer getCantidad() {
-//		return cantidad;
-//	}
-//
-//
-//	public void setCantidad(Integer cantidad) {
-//		this.cantidad = cantidad;
-//	}
 
 
 	public String getDescripcion() {

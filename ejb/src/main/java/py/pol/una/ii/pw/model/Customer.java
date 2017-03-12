@@ -59,6 +59,18 @@ public class Customer implements Serializable {
     @Digits(fraction = 0, integer = 12)
     @Column(name = "phone_number")
     private String phoneNumber;
+    
+    
+    @Column(name = "cuenta")
+    private Integer cuenta;
+
+	public Integer getCuenta() {
+		return cuenta;
+	}
+
+	public void setCuenta(Integer cuenta) {
+		this.cuenta = cuenta;
+	}
 
 	public Long getId() {
 		return id;
