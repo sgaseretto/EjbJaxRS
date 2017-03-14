@@ -37,7 +37,7 @@ public class Compra implements Serializable {
 
 	@NotNull
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "id_productos")
+	@JoinTable(name = "compras_productos", joinColumns = @JoinColumn(name = "id_Compra"), inverseJoinColumns = @JoinColumn(name = "id_Producto"))
 	private List<Product> productos;
    
     @NotNull
