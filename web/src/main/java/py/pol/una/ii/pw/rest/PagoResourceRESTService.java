@@ -23,11 +23,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import py.pol.una.ii.pw.data.CustomerRepository;
 import py.pol.una.ii.pw.data.PagoRepository;
-import py.pol.una.ii.pw.model.Customer;
 import py.pol.una.ii.pw.model.Pago;
-import py.pol.una.ii.pw.service.CustomerRegistration;
 import py.pol.una.ii.pw.service.PagoRegistration;
 
 /**
@@ -49,14 +46,6 @@ public class PagoResourceRESTService {
 
     @Inject
     PagoRegistration registration;
-    
-    @Inject
-    private CustomerRepository repoCliente;
-    
-    @Inject
-    private CustomerRegistration regCliente;
-    
-    private Customer customer;
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -92,14 +81,7 @@ public class PagoResourceRESTService {
             builder = Response.ok();
             
             //Descontar el monto de la cuenta del cliente
-            customer = pago.getCustomer();
-            customer = repoCliente.findById(customer.getId());
-            if (customer.getCuenta() > pago.getMonto()){
-            	Integer saldo = customer.getCuenta()-pago.getMonto();
-                customer.setCuenta(saldo);
-                regCliente.update(customer);
-            }
-            
+           
         } catch (ConstraintViolationException ce) {
             // Handle bean validation issues
             builder = createViolationResponse(ce.getConstraintViolations());

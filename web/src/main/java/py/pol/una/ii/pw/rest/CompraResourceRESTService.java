@@ -25,13 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import py.pol.una.ii.pw.data.CompraRepository;
-import py.pol.una.ii.pw.data.CustomerRepository;
-import py.pol.una.ii.pw.data.ProductRepository;
-import py.pol.una.ii.pw.data.ProviderRepository;
 import py.pol.una.ii.pw.model.Compra;
-import py.pol.una.ii.pw.model.Customer;
-import py.pol.una.ii.pw.model.Product;
-import py.pol.una.ii.pw.model.Provider;
 import py.pol.una.ii.pw.service.CompraRegistration;
 
 /**
@@ -54,14 +48,7 @@ public class CompraResourceRESTService {
     @Inject
     CompraRegistration registration;
     
-    @Inject
-    private ProductRepository repoProducto;
-    
-    @Inject
-    private ProviderRepository repoProveedor;
-    
-    @Inject
-    private CustomerRepository repoCustomer;
+  
     
 
     @GET
@@ -96,18 +83,7 @@ public class CompraResourceRESTService {
             // Validates compra using bean validation
             validateCompra(compra);
             
-            //Rellenar los datos necesarios
-            Provider proveedor = repoProveedor.findById(compra.getProvider().getId());
-            Customer customer = repoCustomer.findById(compra.getCustomer().getId());
-            compra.setProvider(proveedor);
-            compra.setCustomer(customer);
-            int i=0;
-            for(Product pc: compra.getProductos()){
-            	Product p= repoProducto.findById(pc.getId());
-            	compra.getProductos().set(i, p);
-            	i++;
-            }
-            
+        
 
             registration.register(compra);
 

@@ -23,13 +23,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import py.pol.una.ii.pw.data.CustomerRepository;
-import py.pol.una.ii.pw.data.ProductRepository;
 import py.pol.una.ii.pw.data.VentaRepository;
-import py.pol.una.ii.pw.model.Customer;
-import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.model.Venta;
-import py.pol.una.ii.pw.service.CustomerRegistration;
 import py.pol.una.ii.pw.service.VentaRegistration;
 
 @Path("/ventas")
@@ -46,21 +41,6 @@ public class VentaResourceRESTService {
 
     @Inject
     VentaRegistration registration;
-    
-    @Inject
-    private ProductRepository repoProducto;
-    
-    @Inject
-    private CustomerRepository repoCliente;
-    
-    
-    @Inject
-    private CustomerRegistration regCliente;
-    
-    
-
-    
-    private Customer customer;
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,29 +70,8 @@ public class VentaResourceRESTService {
             // Validates venta using bean validation
             validateVenta(venta);
             
-            //Anhadir datos de los productos
-            customer = venta.getCustomer();
-            customer = repoCliente.findById(customer.getId());
-            venta.setCustomer(customer);
-            int i = 0;
-            for(Product pc: venta.getProductos()){
-            	Product p = repoProducto.findById(pc.getId());
-            	venta.getProductos().set(i, p);
-            	i++;
-            }
-
             registration.register(venta);
             
-            //Agregar cuenta de cliente 
-            customer = venta.getCustomer();
-            Integer cuenta = customer.getCuenta();
-            for(Product pc: venta.getProductos()){
-            	Product p = repoProducto.findById(pc.getId());
-            	cuenta = (int) (cuenta + p.getPrice());
-            }
-            customer.setCuenta(cuenta);
-            regCliente.update(customer);
-
             // Create an "ok" response
             builder = Response.ok();
             

@@ -1,7 +1,12 @@
 
 package py.pol.una.ii.pw.service;
 
+import py.pol.una.ii.pw.data.ProductRepository;
+import py.pol.una.ii.pw.data.ProviderRepository;
 import py.pol.una.ii.pw.model.Compra;
+import py.pol.una.ii.pw.model.Product;
+import py.pol.una.ii.pw.model.ProductoComprado;
+import py.pol.una.ii.pw.model.Provider;
 
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -23,15 +28,30 @@ public class CompraRegistration {
     @Inject
     private Event<Compra> compraEventSrc;
     
+    @Inject
+    private ProductRepository repoProducto;
+    
+    @Inject
+    private ProviderRepository repoProveedor;
+
+    
 
     public void register(Compra compra) throws Exception {
     	log.info("Registrando " + compra.getId());
+    	
+        //Rellenar los datos necesarios
+        Provider proveedor = repoProveedor.findById(compra.getProvider().getId());
+        compra.setProvider(proveedor);
+        int i=0;
+        for(ProductoComprado pc: compra.getProductos()){
+        	Product p= repoProducto.findById(pc.getProducto().getId());
+        	pc.setProducto(p);
+        	compra.getProductos().set(i, pc);
+        	i++;
+        }
+        
     	em.persist(compra);
-        //em.flush();
-        //log.info("Registrando " + compra.getId());
 
-        //em.merge(compra);
-        //em.flush();
         compraEventSrc.fire(compra);
     }
     

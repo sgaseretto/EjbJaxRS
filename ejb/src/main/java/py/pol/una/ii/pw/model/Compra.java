@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,15 +13,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @XmlRootElement
@@ -37,13 +30,8 @@ public class Compra implements Serializable {
 
 	@NotNull
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "compras_productos", joinColumns = @JoinColumn(name = "id_Compra"), inverseJoinColumns = @JoinColumn(name = "id_Producto"))
-	private List<Product> productos;
-   
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "id_customer")
-    private Customer customer;
+	@JoinTable(name = "compras_productos", joinColumns = @JoinColumn(name = "id_Compra"), inverseJoinColumns = @JoinColumn(name = "id_ProductoComprado"))
+	private List<ProductoComprado> productos;
     
     @NotNull
     @ManyToOne
@@ -67,21 +55,14 @@ public class Compra implements Serializable {
 		this.id = id;
 	}
 
-	public List<Product> getProductos() {
+	public List<ProductoComprado> getProductos() {
 		return productos;
 	}
 
-	public void setProductos(List<Product> productos) {
+	public void setProductos(List<ProductoComprado> productos) {
 		this.productos = productos;
 	}
 
-	public Customer getCustomer() {
-		return customer;
-	}
-
-	public void setCustomer(Customer customer) {
-		this.customer = customer;
-	}
 
     
     
