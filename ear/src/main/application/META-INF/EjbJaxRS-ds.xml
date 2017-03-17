@@ -22,13 +22,13 @@
     xsi:schemaLocation="http://www.jboss.org/ironjacamar/schema http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
    <!-- The datasource is bound into JNDI at this location. We reference 
       this in META-INF/persistence.xml -->
-    <datasource jndi-name="java:jboss/datasources/EjbJaxRSDS" pool-name="EjbJaxRS"
+    <datasource jndi-name="java:jboss/postgresDS" pool-name="postgresDS"
         enabled="true" use-java-context="true">
-        <connection-url>jdbc:h2:mem:EjbJaxRS;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1</connection-url>
-        <driver>h2</driver>
+        <connection-url>jdbc:postgresql://localhost:5432/pw-backend</connection-url>
+        <driver>postgresql</driver>
         <security>
-            <user-name>sa</user-name>
-            <password>sa</password>
+            <user-name>postgres</user-name>
+            <password>postgres</password>
         </security>
     </datasource>
 </datasources>

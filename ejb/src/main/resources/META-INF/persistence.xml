@@ -25,10 +25,10 @@
          data source, this example data source is just for development and testing! -->
       <!-- The datasource is deployed as <EAR>/META-INF/EjbJaxRS-ds.xml, you
          can find it in the source at ear/src/main/application/META-INF/EjbJaxRS-ds.xml -->
-      <jta-data-source>java:jboss/datasources/EjbJaxRSDS</jta-data-source>
+      <jta-data-source>java:jboss/postgresDS</jta-data-source>
       <properties>
          <!-- Properties for Hibernate -->
-         <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+         <property name="hibernate.hbm2ddl.auto" value="update" />
          <property name="hibernate.show_sql" value="false" />
       </properties>
    </persistence-unit>
