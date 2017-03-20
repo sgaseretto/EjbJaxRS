@@ -62,13 +62,13 @@ public class Customer implements Serializable {
     
     
     @Column(name = "cuenta")
-    private Integer cuenta;
+    private Double cuenta;
 
-	public Integer getCuenta() {
+	public Double getCuenta() {
 		return cuenta;
 	}
 
-	public void setCuenta(Integer cuenta) {
+	public void setCuenta(Double cuenta) {
 		this.cuenta = cuenta;
 	}
 

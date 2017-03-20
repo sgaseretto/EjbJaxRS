@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -20,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,6 +46,9 @@ public class VentaResourceRESTService {
 
     @Inject
     VentaRegistration registration;
+
+    @Context
+    private HttpServletRequest request;
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,30 +67,75 @@ public class VentaResourceRESTService {
         return venta;
     }
     
+//    @POST
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response createVenta(Venta venta) {
+//
+//        Response.ResponseBuilder builder = null;
+//
+//        try {
+//            // Validates venta using bean validation
+//            validateVenta(venta);
+//
+//            registration.register(venta);
+//
+//            // Create an "ok" response
+//            builder = Response.ok();
+//
+//        } catch (ConstraintViolationException ce) {
+//            // Handle bean validation issues
+//            builder = createViolationResponse(ce.getConstraintViolations());
+//        } catch (ValidationException e) {
+//            // Handle the unique constrain violation
+//            Map<String, String> responseObj = new HashMap<String, String>();
+//            responseObj.put("email", "Email taken");
+//            builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
+//        } catch (Exception e) {
+//            // Handle generic exceptions
+//            Map<String, String> responseObj = new HashMap<String, String>();
+//            responseObj.put("error", e.getMessage());
+//            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
+//        }
+//
+//        return builder.build();
+//    }
     @POST
+    @Path("/iniciar")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createVenta(Venta venta) {
-
+    public Response createVenta(Venta venta) throws Exception{
         Response.ResponseBuilder builder = null;
-
-        try {
-            // Validates venta using bean validation
+        try{
+            //Valida la compra usando bean validation
             validateVenta(venta);
-            
-            registration.register(venta);
-            
+
+            VentaRegistration bean = (VentaRegistration) request.getSession().getAttribute("venta");
+            if (bean == null){
+                // EJB is not present in the HTTP session
+                // so let's fetch a new one from the container
+                try {
+                    InitialContext ic = new InitialContext();
+                    bean = (VentaRegistration)
+                            ic.lookup("java:global/EjbJaxRS-ear/EjbJaxRS-ejb/VentaRegistration");
+
+                    // put EJB in HTTP session for future servlet calls
+                    request.getSession().setAttribute("compra",  bean);
+
+                    bean.register(venta);
+                    System.out.println("Creo el bean: "+request.getSession().getId());
+                } catch (NamingException e) {
+                    throw new ServletException(e);
+                }
+            } else {
+                Map<String, String> response = new HashMap<String, String>();
+                response.put("error", "ya existe la venta");
+            }
             // Create an "ok" response
             builder = Response.ok();
-            
         } catch (ConstraintViolationException ce) {
             // Handle bean validation issues
             builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (ValidationException e) {
-            // Handle the unique constrain violation
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("email", "Email taken");
-            builder = Response.status(Response.Status.CONFLICT).entity(responseObj);
         } catch (Exception e) {
             // Handle generic exceptions
             Map<String, String> responseObj = new HashMap<String, String>();
@@ -92,7 +145,8 @@ public class VentaResourceRESTService {
 
         return builder.build();
     }
-    
+
+
     private void validateVenta(Venta venta) throws ConstraintViolationException, ValidationException {
         // Create a bean validator and check for issues.
         Set<ConstraintViolation<Venta>> violations = validator.validate(venta);
