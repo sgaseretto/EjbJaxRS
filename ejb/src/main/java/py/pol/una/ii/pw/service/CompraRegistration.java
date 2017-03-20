@@ -1,23 +1,30 @@
 
 package py.pol.una.ii.pw.service;
 
-import py.pol.una.ii.pw.data.ProductRepository;
-import py.pol.una.ii.pw.data.ProviderRepository;
 import py.pol.una.ii.pw.model.Compra;
-import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.model.ProductoComprado;
-import py.pol.una.ii.pw.model.Provider;
 
-import javax.ejb.Stateless;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.ejb.EJBContext;
+import javax.ejb.Remove;
+import javax.ejb.Stateful;
+import javax.ejb.StatefulTimeout;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.transaction.UserTransaction;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
-@Stateless
-public class CompraRegistration {
+@Stateful
+@StatefulTimeout(unit = TimeUnit.MINUTES, value = 30)
+@TransactionManagement(TransactionManagementType.BEAN)
+public class CompraRegistration{
 
     @Inject
     private Logger log;
@@ -28,32 +35,59 @@ public class CompraRegistration {
     @Inject
     private Event<Compra> compraEventSrc;
     
-    @Inject
-    private ProductRepository repoProducto;
+ 
     
-    @Inject
-    private ProviderRepository repoProveedor;
+    @Resource
+    private EJBContext context;
 
+    private UserTransaction transaccion;
+
+    private Compra compra_en_proceso;
     
-
-    public void register(Compra compra) throws Exception {
-    	log.info("Registrando " + compra.getId());
-    	
-        //Rellenar los datos necesarios
-        Provider proveedor = repoProveedor.findById(compra.getProvider().getId());
-        compra.setProvider(proveedor);
-        int i=0;
-        for(ProductoComprado pc: compra.getProductos()){
-        	Product p= repoProducto.findById(pc.getProducto().getId());
-        	pc.setProducto(p);
-        	compra.getProductos().set(i, pc);
-        	i++;
-        }
-        
-    	em.persist(compra);
-
-        compraEventSrc.fire(compra);
+    
+    
+    @PostConstruct
+    private void init(){
+    	compra_en_proceso = new Compra();
     }
+    @Remove
+    public void confirmar() throws Exception {
+    	transaccion.commit();
+    }
+    @Remove
+    public void cancelar() throws Exception {
+        transaccion.rollback();
+    }
+    
+
+
+    public void iniciar(Compra compra) throws Exception{
+    	compra_en_proceso = compra;
+        transaccion = context.getUserTransaction();
+        transaccion.begin();
+        em.persist(compra_en_proceso);
+          	
+    }
+
+    public void addProductos(ProductoComprado producto_agregado) {	
+       compra_en_proceso.getProductos().add(producto_agregado);
+        em.persist(compra_en_proceso);
+    }
+
+    public void removeProductos(ProductoComprado producto_a_eliminar) {
+        int cont = 0;
+        int aux = 0;
+    	for(ProductoComprado pc: compra_en_proceso.getProductos()){
+        	if(pc.getProducto().getId().equals(producto_a_eliminar.getProducto().getId())){
+        	aux = cont;
+        	}
+        	cont++;
+        }
+    	compra_en_proceso.getProductos().remove(aux);
+        em.persist(compra_en_proceso);
+    }
+    
+    
     
     public void update(Compra compra) throws Exception {
     	log.info("Actualizando Compra, el nuevo nombre es: " + compra.getId());
@@ -67,4 +101,5 @@ public class CompraRegistration {
     	em.remove(compra);
     	em.flush();
     }
+    
 }

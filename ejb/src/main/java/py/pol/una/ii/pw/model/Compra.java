@@ -33,7 +33,6 @@ public class Compra implements Serializable {
 	@JoinTable(name = "compras_productos", joinColumns = @JoinColumn(name = "id_Compra"), inverseJoinColumns = @JoinColumn(name = "id_ProductoComprado"))
 	private List<ProductoComprado> productos;
     
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "id_provider")
     private Provider provider;

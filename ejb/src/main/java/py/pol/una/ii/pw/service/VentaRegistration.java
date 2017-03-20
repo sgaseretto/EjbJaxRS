@@ -41,7 +41,7 @@ public class VentaRegistration {
         venta.setCustomer(customer);
         int i = 0;
         for(ProductoComprado pc: venta.getProductos()){
-        	Product p = repoProducto.findById(pc.getId());
+        	Product p = repoProducto.findById(pc.getProducto().getId());
         	pc.setProducto(p);
         	venta.getProductos().set(i, pc);
         	i++;
