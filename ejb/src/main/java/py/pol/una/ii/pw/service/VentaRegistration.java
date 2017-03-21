@@ -9,20 +9,26 @@ import py.pol.una.ii.pw.model.Venta;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.ejb.EJBContext;
 import javax.ejb.Remove;
-import javax.ejb.Stateless;
+import javax.ejb.Stateful;
+import javax.ejb.StatefulTimeout;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.UserTransaction;
-import javax.ejb.EJBContext;
+
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-
 // The @Stateless annotation eliminates the need for manual transaction demarcation
-@Stateless
-public class VentaRegistration {
-	
+@Stateful
+@StatefulTimeout(unit = TimeUnit.MINUTES, value = 30)
+@TransactionManagement(TransactionManagementType.BEAN)
+public class VentaRegistration{
+
     @Inject
     private Logger log;
 
@@ -33,110 +39,92 @@ public class VentaRegistration {
     private Event<Venta> ventaEventSrc;
     
     @Inject
-    private CustomerRepository repoCliente;
-    
-    @Inject
-    private ProductRepository repoProducto;
-    
-    @Inject
     private CustomerRegistration regCliente;
-    
-    
-    private Customer customer;
 
+    @Inject
+    private CustomerRepository repoCustomer;
+
+    @Inject
+    private ProductRepository repoProduct;
+    
     @Resource
     private EJBContext context;
 
-    private UserTransaction tx;
+    private UserTransaction transaccion;
 
-    private Venta venta_actual;
-
+    private Venta venta_en_proceso;
+    
+    private Customer customer;
+    
+    
     @PostConstruct
-    public void initializateBean(){
-        venta_actual = new Venta();
+    private void init(){
+    	venta_en_proceso = new Venta();
     }
-
-    public void register(Venta venta) throws Exception {
-    	 //Anhadir datos de los productos
-//        customer = venta.getCustomer();
-//        customer = repoCliente.findById(customer.getId());
-//        venta.setCustomer(customer);
-//        int i = 0;
-//        for(ProductoComprado pc: venta.getProductos()){
-//        	Product p = repoProducto.findById(pc.getProducto().getId());
-//        	pc.setProducto(p);
-//        	venta.getProductos().set(i, pc);
-//        	i++;
-//        }
-
-//        em.merge(venta);
-//        em.flush();
-        //em.persist(venta);
-//        ventaEventSrc.fire(venta);
-      
-        
-        //Agregar cuenta de cliente 
-//        Integer cuenta = customer.getCuenta();
-//        for(ProductoComprado pc: venta.getProductos()){
-//        	Product p = repoProducto.findById(pc.getId());
-//        	cuenta = (int) (cuenta + p.getPrice()*pc.getCantidad());
-//        }
-//        customer.setCuenta(cuenta);
-//        regCliente.update(customer);
-        log.info("Registrando venta de:" + venta.getCustomer());
-        tx=context.getUserTransaction();
-        venta_actual=venta;
-        tx.begin();
-        em.persist(venta_actual);
-        ventaEventSrc.fire(venta);
-
-    }
-
-    public void agregarCarrito (ProductoComprado pc) throws Exception{
-        venta_actual.getProductos().add(pc);
-        em.persist(venta_actual);
-    }
-
-    public void removeItem(Product p) throws Exception{
-        boolean flag = false;
-        int n = venta_actual.getProductos().size();
-        for (int i=0; i<n; i++){
-            ProductoComprado pc = venta_actual.getProductos().get(i);
-            if(p.getId().equals(pc.getProducto().getId())){
-                venta_actual.getProductos().remove(i);
-                em.persist(venta_actual);
-                flag = true;
-                n--;
-            }
-        }
-        if (!flag){
-            log.info("El item a eliminar no existe");
-        }
-    }
-
+    
     @Remove
-    public void completarVenta(){
-        try{
-            tx.commit();
-            customer = repoCliente.findById(venta_actual.getCustomer().getId());
-            //Agregar cuenta del cliente
-            double cuenta = customer.getCuenta();
-            Product p;
-            for(ProductoComprado pc : venta_actual.getProductos()){
-                p = repoProducto.findById(pc.getProducto().getId());
-                cuenta = cuenta + (p.getPrice() * pc.getCantidad());
+    public void confirmar() throws Exception {
+        try {
+            transaccion.commit();
+            customer = repoCustomer.findById(venta_en_proceso.getCustomer().getId());
+            //Agregar cuenta de cliente
+            Float cuenta = customer.getCuenta();
+            for (ProductoComprado pc : venta_en_proceso.getProductos()) {
+                Product p = repoProduct.findById(pc.getProducto().getId());
+                cuenta = (float) (cuenta + (p.getPrice() * pc.getCantidad()));
             }
             customer.setCuenta(cuenta);
             regCliente.update(customer);
+
         } catch (Exception e){
             System.out.println("Fallo el commit");
         }
-    }
 
+    }
+    
     @Remove
-    public void cancelarVenta() throws Exception{
-        tx.rollback();
+    public void cancelar() throws Exception {
+        transaccion.rollback();
+    }
+    
+
+    public void iniciar(Venta venta) throws Exception{
+    	venta_en_proceso = venta;
+        transaccion = context.getUserTransaction();
+        transaccion.begin();
+        em.persist(venta_en_proceso);    	
     }
 
+    public void addProductos(ProductoComprado producto_agregado) {	
+    	venta_en_proceso.getProductos().add(producto_agregado);
+        em.persist(venta_en_proceso);
+    }
 
+    public void removeProductos(ProductoComprado producto_a_eliminar) {
+        int cont = 0;
+        int aux = 0;
+    	for(ProductoComprado pc: venta_en_proceso.getProductos()){
+        	if(pc.getProducto().getId().equals(producto_a_eliminar.getProducto().getId())){
+        	aux = cont;
+        	}
+        	cont++;
+        }
+    	venta_en_proceso.getProductos().remove(aux);
+        em.persist(venta_en_proceso);
+    }
+    
+    public void update(Venta venta) throws Exception {
+    	log.info("Actualizando Compra, el nuevo nombre es: " + venta.getId());
+    	em.merge(venta);
+    	em.flush();
+    	ventaEventSrc.fire(venta);
+    }
+    
+    public void remove(Venta venta) throws Exception {
+    	venta = em.merge(venta);
+    	em.remove(venta);
+    	em.flush();
+    }
+    
 }
+    
