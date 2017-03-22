@@ -40,7 +40,7 @@ public class PagoRegistration {
         customer = pago.getCustomer();
         customer = repoCliente.findById(customer.getId());
         if (customer.getCuenta() > pago.getMonto()){
-        	Double saldo = customer.getCuenta()-pago.getMonto();
+        	Float saldo = customer.getCuenta()-pago.getMonto();
             customer.setCuenta(saldo);
             regCliente.update(customer);
         }

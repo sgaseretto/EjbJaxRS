@@ -112,6 +112,9 @@ public class CompraResourceRESTService {
                } catch (NamingException e) {
                  throw new ServletException(e);
                }
+         }else{
+             Map<String, String> response = new HashMap<String, String>();
+             response.put("error", "ya existe la compra");
          }
            
             // Create an "ok" response
@@ -184,14 +187,14 @@ public class CompraResourceRESTService {
             if(bean != null){
             	 if(opcion != null && opcion.equalsIgnoreCase("confirmar")){
                 	   bean.confirmar();
+                       request.getSession().setAttribute("compra", null);
                    }   
                    
                  if(opcion != null && opcion.equalsIgnoreCase("cancelar")){
                   	   bean.cancelar();
+                       request.getSession().setAttribute( "compra", null);
                      } 
-                request.getSession().setAttribute(
-                        "compra",
-                        null);
+
                 builder = Response.ok();
             }
             // Create an "ok" response
