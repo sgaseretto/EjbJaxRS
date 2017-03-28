@@ -1,5 +1,6 @@
 package py.pol.una.ii.pw.rest;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,11 +27,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -39,12 +38,6 @@ import py.pol.una.ii.pw.data.CompraRepository;
 import py.pol.una.ii.pw.model.Compra;
 import py.pol.una.ii.pw.model.ProductoComprado;
 import py.pol.una.ii.pw.service.CompraRegistration;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 
 
 /**
@@ -116,9 +109,9 @@ public class CompraResourceRESTService {
                        throw new ServletException(e);
                      }
                }else{
-                   Map<String, String> response = new HashMap<String, String>();
-                   response.put("error","error");
-               }
+                     request.getSession().setAttribute("compra",  bean);
+                     bean.compraFile(fileName);
+                 }
 
                  return Response.status(200).entity("Uploaded file name : " + fileName)
                          .build();
@@ -158,11 +151,69 @@ public class CompraResourceRESTService {
          fop.flush();
          fop.close();
      }
- 
-     
-     
-     
-     
+
+
+
+    protected Response.ResponseBuilder getNoCacheResponseBuilder( Response.Status status ) {
+        CacheControl cc = new CacheControl();
+        cc.setNoCache( true );
+        cc.setMaxAge( -1 );
+        cc.setMustRevalidate( true );
+
+        return Response.status( status ).cacheControl( cc );
+    }
+
+
+    @GET
+    @Path( "/download" )
+    @Produces( "application/json" )
+    public Response streamGenerateCompras() {
+
+        return getNoCacheResponseBuilder( Response.Status.OK ).entity( new StreamingOutput() {
+
+            // Instruct how StreamingOutput's write method is to stream the data
+            @Override
+            public void write( OutputStream os ) throws IOException, WebApplicationException {
+                int tamano = 10;                      // Number of records for every round trip to the database
+                int inicio = 0;                             // Initial record position index
+                int tamanoTotalLista = registration.getTamanoLista();   // Total records found for the query
+
+                // Empezar el streaming de datos
+                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os ) ) ) ) {
+
+                    writer.print( "[" );
+
+                    while ( tamanoTotalLista > 0 ) {
+                        // Conseguir los datos paginados de la BD
+                        List<Compra> compras = registration.listar( inicio, tamano );
+                        Gson gs = new Gson();
+                        for ( Compra compra : compras ) {
+                            if ( inicio > 0 ) {
+                                writer.print( "," );
+                            }
+
+                            // Stream de los datos en json
+
+                            writer.print(gs.toJson(compra));
+
+                            // Aumentar la posicion de la pagina
+                            inicio++;
+                        }
+
+                        // Actualizar el numero de datos restantes
+                        tamanoTotalLista -= tamano;
+                    }
+
+                    // Se termina el json
+                    writer.print( "]" );
+                }
+            }
+        } ).build();
+    }
+
+
+
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -181,140 +232,7 @@ public class CompraResourceRESTService {
         return compra;
     }
 
-    /**
-     * Creates a new compra from the values provided. Performs validation, and will return a JAX-RS response with either 200 ok,
-     * or with a map of fields, and related errors.
-     */
-    /*
-    @POST
-    @Path("/iniciar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createCompra(Compra compra) {
 
-        Response.ResponseBuilder builder = null;
-
-        try {
-            // Validates compra using bean validation
-            validateCompra(compra);
-            
-           CompraRegistration bean = (CompraRegistration) request.getSession().getAttribute("compra");
-            
-           if(bean == null){
-               // EJB is not present in the HTTP session
-               // so let's fetch a new one from the container
-               try {
-                 InitialContext ic = new InitialContext();
-                 bean = (CompraRegistration) 
-                  ic.lookup("java:global/EjbJaxRS-ear/EjbJaxRS-ejb/CompraRegistration");
-
-                 // put EJB in HTTP session for future servlet calls
-                 request.getSession().setAttribute("compra",  bean);
-                
-              	   bean.iniciar(compra);
-
-
-               } catch (NamingException e) {
-                 throw new ServletException(e);
-               }
-         }else{
-             Map<String, String> response = new HashMap<String, String>();
-             response.put("error", "ya existe la compra");
-         }
-           
-            // Create an "ok" response
-           builder = Response.ok();
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
-
-        return builder.build();
-    }
-    
-    
-    @POST
-    @Path("/comprar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createCompra(@QueryParam("opcion") String opcion,ProductoComprado p) {
-
-        Response.ResponseBuilder builder = null;
-
-        try {
-
-               CompraRegistration bean = (CompraRegistration) request.getSession().getAttribute("compra");
-			   
-			   if(bean != null){
-            
-			     if(opcion != null && opcion.equalsIgnoreCase("agregar")){
-			         bean.addProductos(p);
-			       }
-    
-			     if(opcion != null && opcion.equalsIgnoreCase("eliminar")){
-			    	 bean.removeProductos(p);
-			       }
-         
-			   }
-       
-            // Create an "ok" response
-            builder = Response.ok();
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
-
-        return builder.build();
-    }
-    
-    @POST
-    @Path("/terminar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response confirmar(@QueryParam("opcion") String opcion) {
-
-        Response.ResponseBuilder builder = null;
-
-        try {
-            // Validates compra using bean validation
-            CompraRegistration bean = (CompraRegistration) request.getSession().getAttribute("compra");
-          
-            if(bean != null){
-            	 if(opcion != null && opcion.equalsIgnoreCase("confirmar")){
-                	   bean.confirmar();
-                       request.getSession().setAttribute("compra", null);
-                   }   
-                   
-                 if(opcion != null && opcion.equalsIgnoreCase("cancelar")){
-                  	   bean.cancelar();
-                       request.getSession().setAttribute( "compra", null);
-                     } 
-
-                builder = Response.ok();
-            }
-            // Create an "ok" response
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
-
-        return builder.build();
-}*/
 
     /**
      * <p>

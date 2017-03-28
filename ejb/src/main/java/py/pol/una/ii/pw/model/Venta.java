@@ -3,21 +3,16 @@ package py.pol.una.ii.pw.model;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
 @Table(name = "Venta")
+@NamedQueries( {
+		@NamedQuery( name = "Venta.listar", query = "SELECT u FROM Venta u" ),
+		@NamedQuery( name = "Venta.tamano", query = "SELECT count(u) FROM Venta u" )})
 public class Venta implements Serializable {
     /** Default value included to remove warning. Remove or modify at will. **/
     private static final long serialVersionUID = 1L;

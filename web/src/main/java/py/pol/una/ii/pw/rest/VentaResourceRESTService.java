@@ -1,5 +1,6 @@
 package py.pol.una.ii.pw.rest;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,12 +27,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import py.pol.una.ii.pw.data.VentaRepository;
-import py.pol.una.ii.pw.model.ProductoComprado;
 import py.pol.una.ii.pw.model.Venta;
 import py.pol.una.ii.pw.service.VentaRegistration;
 
@@ -77,134 +79,150 @@ public class VentaResourceRESTService {
         return venta;
     }
 
-    /**
-     * Creates a new venta from the values provided. Performs validation, and will return a JAX-RS response with either 200 ok,
-     * or with a map of fields, and related errors.
-     */
     @POST
-    @Path("/iniciar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createVenta(Venta venta) {
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadFile(MultipartFormDataInput input) throws IOException {
 
-        Response.ResponseBuilder builder = null;
+        Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
-        try {
-            // Validates venta using bean validation
-            validateVenta(venta);
-            
-            VentaRegistration bean = (VentaRegistration) request.getSession().getAttribute("venta");
-            
-           if(bean == null){
-               // EJB is not present in the HTTP session
-               // so let's fetch a new one from the container
-               try {
-                 InitialContext ic = new InitialContext();
-                 bean = (VentaRegistration) 
-                  ic.lookup("java:global/EjbJaxRS-ear/EjbJaxRS-ejb/VentaRegistration");
+        // Get file data to save
+        List<InputPart> inputParts = uploadForm.get("file");
 
-                 // put EJB in HTTP session for future servlet calls
-                 request.getSession().setAttribute("venta",  bean);
-                
-              	   bean.iniciar(venta);
+        for (InputPart inputPart : inputParts) {
+            try {
 
+                MultivaluedMap<String, String> header = inputPart.getHeaders();
+                String fileName = getFileName(header);
 
-               } catch (NamingException e) {
-                 throw new ServletException(e);
-               }
-         }
-           
-            // Create an "ok" response
-            builder = Response.ok();
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
+                // convert the uploaded file to inputstream
+                InputStream inputStream = inputPart.getBody(InputStream.class,
+                        null);
 
-        return builder.build();
-    }
-    
-    
-    @POST
-    @Path("/vender")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createVenta(@QueryParam("opcion") String opcion,ProductoComprado p) {
+                byte[] bytes = IOUtils.toByteArray(inputStream);
+                // constructs upload file path
+                fileName = "/home/cristhianjbd/Escritorio/file/" + fileName;
 
-        Response.ResponseBuilder builder = null;
+                writeFile(bytes, fileName);
 
-        try {
+                VentaRegistration bean = (VentaRegistration) request.getSession().getAttribute("venta");
 
-               VentaRegistration bean = (VentaRegistration) request.getSession().getAttribute("venta");
-			   
-			   if(bean != null){
-            
-			     if(opcion != null && opcion.equalsIgnoreCase("agregar")){
-			         bean.addProductos(p);
-			       }
-    
-			     if(opcion != null && opcion.equalsIgnoreCase("eliminar")){
-			    	 bean.removeProductos(p);
-			       }
-         
-			   }
-       
-            // Create an "ok" response
-            builder = Response.ok();
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
-        }
+                if(bean == null){
+                    // EJB is not present in the HTTP session
+                    // so let's fetch a new one from the container
+                    try {
+                        InitialContext ic = new InitialContext();
+                        bean = (VentaRegistration) ic.lookup("java:global/EjbJaxRS-ear/EjbJaxRS-ejb/VentaRegistration");
 
-        return builder.build();
-    }
-    
-    @POST
-    @Path("/terminar")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response confirmar(@QueryParam("opcion") String opcion) {
+                        // put EJB in HTTP session for future servlet calls
+                        request.getSession().setAttribute("venta",  bean);
 
-        Response.ResponseBuilder builder = null;
+                        bean.ventaFile(fileName);
 
-        try {
-            
-        	VentaRegistration bean = (VentaRegistration) request.getSession().getAttribute("venta");
-          
-            if(bean != null){
-            	 if(opcion != null && opcion.equalsIgnoreCase("confirmar")){
-                	   bean.confirmar();
-                   }   
-                   
-                 if(opcion != null && opcion.equalsIgnoreCase("cancelar")){
-                  	   bean.cancelar();
-                     } 
-                request.getSession().setAttribute("venta",null);
-                builder = Response.ok();
+                    } catch (NamingException e) {
+                        throw new ServletException(e);
+                    }
+                }else{
+                    request.getSession().setAttribute("venta",  bean);
+                    bean.ventaFile(fileName);
+                }
+
+                return Response.status(200).entity("Uploaded file name : " + fileName)
+                        .build();
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            // Create an "ok" response
-        } catch (ConstraintViolationException ce) {
-            // Handle bean validation issues
-            builder = createViolationResponse(ce.getConstraintViolations());
-        } catch (Exception e) {
-            // Handle generic exceptions
-            Map<String, String> responseObj = new HashMap<String, String>();
-            responseObj.put("error", e.getMessage());
-            builder = Response.status(Response.Status.BAD_REQUEST).entity(responseObj);
         }
+        return null;
+    }
 
-        return builder.build();
-}
+    private String getFileName(MultivaluedMap<String, String> header) {
+
+        String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+
+        for (String filename : contentDisposition) {
+            if ((filename.trim().startsWith("filename"))) {
+
+                String[] name = filename.split("=");
+
+                String finalFileName = name[1].trim().replaceAll("\"", "");
+                return finalFileName;
+            }
+        }
+        return "unknown";
+    }
+
+    // Utility method
+    private void writeFile(byte[] content, String filename) throws IOException {
+        File file = new File(filename);
+        if (!file.exists()) {
+            System.out.println("not exist> " + file.getAbsolutePath());
+            file.createNewFile();
+        }
+        FileOutputStream fop = new FileOutputStream(file);
+        fop.write(content);
+        fop.flush();
+        fop.close();
+    }
+
+
+    protected Response.ResponseBuilder getNoCacheResponseBuilder( Response.Status status ) {
+        CacheControl cc = new CacheControl();
+        cc.setNoCache( true );
+        cc.setMaxAge( -1 );
+        cc.setMustRevalidate( true );
+
+        return Response.status( status ).cacheControl( cc );
+    }
+
+    @GET
+    @Path( "/download" )
+    @Produces( "application/json" )
+    public Response streamGenerateVentas() {
+
+        return getNoCacheResponseBuilder( Response.Status.OK ).entity( new StreamingOutput() {
+
+            // Instruct how StreamingOutput's write method is to stream the data
+            @Override
+            public void write( OutputStream os ) throws IOException, WebApplicationException {
+                int tamano = 10;                      // Number of records for every round trip to the database
+                int inicio = 0;                             // Initial record position index
+                int tamanoTotalLista = registration.getTamanoLista();   // Total records found for the query
+
+                // Empezar el streaming de datos
+                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os ) ) ) ) {
+
+                    writer.print( "[" );
+
+                    while ( tamanoTotalLista > 0 ) {
+                        // Conseguir los datos paginados de la BD
+                        List<Venta> ventas = registration.listar( inicio, tamano );
+                        Gson gs = new Gson();
+                        for ( Venta venta : ventas ) {
+                            if ( inicio > 0 ) {
+                                writer.print( "," );
+                            }
+
+                            // Stream de los datos en json
+
+                            writer.print(gs.toJson(venta));
+
+                            // Aumentar la posicion de la pagina
+                            inicio++;
+                        }
+
+                        // Actualizar el numero de datos restantes
+                        tamanoTotalLista -= tamano;
+                    }
+
+                    // Se termina el json
+                    writer.print( "]" );
+                }
+            }
+        } ).build();
+    }
+
 
     /**
      * <p>

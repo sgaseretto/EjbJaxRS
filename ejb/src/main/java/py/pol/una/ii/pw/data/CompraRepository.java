@@ -32,7 +32,6 @@ public class CompraRepository {
         // criteria.select(compra).orderBy(cb.asc(compra.get(Compra_.name)));
         criteria.select(compra).orderBy(cb.asc(compra.get("id")));
         return em.createQuery(criteria).getResultList();
-        
-                
+
     }
 }

@@ -1,11 +1,9 @@
 package py.pol.una.ii.pw.service;
 
+import com.google.gson.Gson;
 import py.pol.una.ii.pw.data.CustomerRepository;
 import py.pol.una.ii.pw.data.ProductRepository;
-import py.pol.una.ii.pw.model.Customer;
-import py.pol.una.ii.pw.model.Product;
-import py.pol.una.ii.pw.model.ProductoComprado;
-import py.pol.una.ii.pw.model.Venta;
+import py.pol.una.ii.pw.model.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -20,12 +18,15 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.UserTransaction;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
 @Stateful
-@StatefulTimeout(unit = TimeUnit.MINUTES, value = 30)
 @TransactionManagement(TransactionManagementType.BEAN)
 public class VentaRegistration{
 
@@ -46,10 +47,8 @@ public class VentaRegistration{
 
     @Inject
     private ProductRepository repoProduct;
-    
-    @Resource
-    private EJBContext context;
 
+    @Resource
     private UserTransaction transaccion;
 
     private Venta venta_en_proceso;
@@ -59,62 +58,63 @@ public class VentaRegistration{
     
     @PostConstruct
     private void init(){
-    	venta_en_proceso = new Venta();
+        venta_en_proceso = new Venta();
     }
-    
-    @Remove
-    public void confirmar() throws Exception {
-        try {
-            transaccion.commit();
-            customer = repoCustomer.findById(venta_en_proceso.getCustomer().getId());
-            //Agregar cuenta de cliente
-            Float cuenta = customer.getCuenta();
-            for (ProductoComprado pc : venta_en_proceso.getProductos()) {
-                Product p = repoProduct.findById(pc.getProducto().getId());
-                cuenta = (float) (cuenta + (p.getPrice() * pc.getCantidad()));
-            }
-            customer.setCuenta(cuenta);
-            regCliente.update(customer);
 
-        } catch (Exception e){
-            System.out.println("Fallo el commit");
-        }
-
-    }
-    
-    @Remove
-    public void cancelar() throws Exception {
-        transaccion.rollback();
-    }
-    
-
-    public void iniciar(Venta venta) throws Exception{
-    	venta_en_proceso = venta;
-        transaccion = context.getUserTransaction();
+    public void ventaFile(String fileName) throws Exception{
+        boolean fallo = false;
         transaccion.begin();
-        em.persist(venta_en_proceso);    	
-    }
+        Gson gson = new Gson();
+        System.out.println("el directorio"+fileName);
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 
-    public void addProductos(ProductoComprado producto_agregado) {	
-    	venta_en_proceso.getProductos().add(producto_agregado);
-        em.persist(venta_en_proceso);
-    }
+            String sCurrentLine;
+            int i =1;
+            while ((sCurrentLine = br.readLine()) != null && fallo != true) {
 
-    public void removeProductos(ProductoComprado producto_a_eliminar) {
-        int cont = 0;
-        int aux = 0;
-    	for(ProductoComprado pc: venta_en_proceso.getProductos()){
-        	if(pc.getProducto().getId().equals(producto_a_eliminar.getProducto().getId())){
-        	aux = cont;
-        	}
-        	cont++;
+                try{
+                    venta_en_proceso= gson.fromJson(sCurrentLine, Venta.class);
+                    System.out.println("se ha registrado la venta:"+i+ "  " +venta_en_proceso);
+                    em.persist(venta_en_proceso);
+                    i++;
+                }catch(Exception e){
+                    System.out.println("error al cargar las ventas");
+
+                    transaccion.rollback();
+                    fallo=true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    	venta_en_proceso.getProductos().remove(aux);
-        em.persist(venta_en_proceso);
+        if(fallo==false) {
+            try {
+                transaccion.commit();
+            }catch (Exception e){
+                System.out.println("Error al hacer commit");
+            }
+        }
     }
-    
+
+
+    public int getTamanoLista() {
+        return em.createNamedQuery( "Venta.tamano", Long.class )
+                .getSingleResult().intValue();
+    }
+
+    public List<Venta> listar(int inicio, int cantidad ) {
+        return em.createNamedQuery( "Venta.listar" )
+                .setFirstResult( inicio )
+                .setMaxResults( cantidad )
+                .getResultList();
+    }
+
+
+
+
+
     public void update(Venta venta) throws Exception {
-    	log.info("Actualizando Compra, el nuevo nombre es: " + venta.getId());
+    	log.info("Actualizando Venta, el nuevo nombre es: " + venta.getId());
     	em.merge(venta);
     	em.flush();
     	ventaEventSrc.fire(venta);
