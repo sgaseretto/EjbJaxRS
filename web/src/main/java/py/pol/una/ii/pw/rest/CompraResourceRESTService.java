@@ -28,12 +28,24 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.IOUtils;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import py.pol.una.ii.pw.data.CompraRepository;
 import py.pol.una.ii.pw.model.Compra;
 import py.pol.una.ii.pw.model.ProductoComprado;
 import py.pol.una.ii.pw.service.CompraRegistration;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+
 
 /**
  * JAX-RS Example
@@ -58,7 +70,99 @@ public class CompraResourceRESTService {
 
      @Context
      private HttpServletRequest request;
-    
+   
+   
+     @POST
+     @Path("/upload")
+     @Consumes(MediaType.MULTIPART_FORM_DATA)
+     public Response uploadFile(MultipartFormDataInput input) throws IOException {
+          
+         Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+
+         // Get file data to save
+         List<InputPart> inputParts = uploadForm.get("file");
+
+         for (InputPart inputPart : inputParts) {
+             try {
+
+                 MultivaluedMap<String, String> header = inputPart.getHeaders();
+                 String fileName = getFileName(header);
+   
+                 // convert the uploaded file to inputstream
+                 InputStream inputStream = inputPart.getBody(InputStream.class,
+                         null);
+
+                 byte[] bytes = IOUtils.toByteArray(inputStream);
+                 // constructs upload file path
+                 fileName = "/home/cristhianjbd/Escritorio/file/" + fileName;
+   
+                 writeFile(bytes, fileName);
+                 
+                 CompraRegistration bean = (CompraRegistration) request.getSession().getAttribute("compra");
+                 
+                 if(bean == null){
+                     // EJB is not present in the HTTP session
+                     // so let's fetch a new one from the container
+                     try {
+                       InitialContext ic = new InitialContext();
+                       bean = (CompraRegistration) ic.lookup("java:global/EjbJaxRS-ear/EjbJaxRS-ejb/CompraRegistration");
+
+                       // put EJB in HTTP session for future servlet calls
+                       request.getSession().setAttribute("compra",  bean);
+                      
+                       bean.compraFile(fileName);
+
+                     } catch (NamingException e) {
+                       throw new ServletException(e);
+                     }
+               }else{
+                   Map<String, String> response = new HashMap<String, String>();
+                   response.put("error","error");
+               }
+
+                 return Response.status(200).entity("Uploaded file name : " + fileName)
+                         .build();
+
+             } catch (Exception e) {
+                 e.printStackTrace();
+             }
+         }
+         return null;
+     }
+
+     private String getFileName(MultivaluedMap<String, String> header) {
+
+         String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+
+         for (String filename : contentDisposition) {
+             if ((filename.trim().startsWith("filename"))) {
+
+                 String[] name = filename.split("=");
+
+                 String finalFileName = name[1].trim().replaceAll("\"", "");
+                 return finalFileName;
+             }
+         }
+         return "unknown";
+     }
+
+     // Utility method
+     private void writeFile(byte[] content, String filename) throws IOException {
+         File file = new File(filename);
+         if (!file.exists()) {
+             System.out.println("not exist> " + file.getAbsolutePath());
+             file.createNewFile();
+         }
+         FileOutputStream fop = new FileOutputStream(file);
+         fop.write(content);
+         fop.flush();
+         fop.close();
+     }
+ 
+     
+     
+     
+     
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -81,6 +185,7 @@ public class CompraResourceRESTService {
      * Creates a new compra from the values provided. Performs validation, and will return a JAX-RS response with either 200 ok,
      * or with a map of fields, and related errors.
      */
+    /*
     @POST
     @Path("/iniciar")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -118,7 +223,7 @@ public class CompraResourceRESTService {
          }
            
             // Create an "ok" response
-            builder = Response.ok();
+           builder = Response.ok();
         } catch (ConstraintViolationException ce) {
             // Handle bean validation issues
             builder = createViolationResponse(ce.getConstraintViolations());
@@ -209,7 +314,7 @@ public class CompraResourceRESTService {
         }
 
         return builder.build();
-}
+}*/
 
     /**
      * <p>

@@ -95,6 +95,30 @@
            <artifactId>servlet-api</artifactId>
            <version>2.5</version>
        </dependency>
+   <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
+	       <dependency>
+	          <groupId>org.jboss.resteasy</groupId>
+	          <artifactId>resteasy-jaxrs</artifactId>
+	          <version>2.2.1.GA</version>
+	          <scope>provided</scope>
+	       </dependency>
+	
+	      <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-multipart-provider -->
+	       <dependency>
+	           <groupId>org.jboss.resteasy</groupId>
+           	   <artifactId>resteasy-multipart-provider</artifactId>
+	           <version>2.2.0.GA</version>
+               <scope>provided</scope>
+	       </dependency>
+
+	
+       <!-- optional, good for handle I/O task -->
+       <dependency>
+           <groupId>commons-io</groupId>
+           <artifactId>commons-io</artifactId>
+           <version>2.0.1</version>
+       </dependency>
+      
 
 
    </dependencies>

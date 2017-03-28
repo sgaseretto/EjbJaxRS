@@ -10,19 +10,27 @@ import javax.ejb.EJBContext;
 import javax.ejb.Remove;
 import javax.ejb.Stateful;
 import javax.ejb.StatefulTimeout;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.enterprise.context.spi.Context;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.transaction.NotSupportedException;
+import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
 @Stateful
-@StatefulTimeout(unit = TimeUnit.MINUTES, value = 30)
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CompraRegistration{
 
@@ -35,11 +43,9 @@ public class CompraRegistration{
     @Inject
     private Event<Compra> compraEventSrc;
     
- 
-    
+   // @Resource
+   // private EJBContext context;
     @Resource
-    private EJBContext context;
-
     private UserTransaction transaccion;
 
     private Compra compra_en_proceso;
@@ -50,7 +56,41 @@ public class CompraRegistration{
     private void init(){
     	compra_en_proceso = new Compra();
     }
-    @Remove
+  
+
+    public void compraFile(String fileName) throws Exception{
+    	//transaccion = context.getUserTransaction();
+    	transaccion.begin();
+    	Gson gson = new Gson();
+    	System.out.println("el directorio"+fileName);
+    	try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+
+			String sCurrentLine;
+			int i = 1;
+			while ((sCurrentLine = br.readLine()) != null) {
+				compra_en_proceso= gson.fromJson(sCurrentLine, Compra.class);
+				try{
+					System.out.println("se ha registrado la compra:"+compra_en_proceso);
+					em.persist(compra_en_proceso);
+				}catch(Exception e){
+					System.out.println("error al cargar las compras");
+					 transaccion.rollback();
+					 
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+    	transaccion.commit();
+    }
+    
+    
+    
+    
+    
+  /*  
+     @Remove
     public void confirmar() throws Exception {
     	transaccion.commit();
     }
@@ -59,7 +99,6 @@ public class CompraRegistration{
         transaccion.rollback();
     }
     
-
 
     public void iniciar(Compra compra) throws Exception{
     	compra_en_proceso = compra;
@@ -88,7 +127,7 @@ public class CompraRegistration{
     }
     
     
-    
+    */
     public void update(Compra compra) throws Exception {
     	log.info("Actualizando Compra, el nuevo nombre es: " + compra.getId());
     	em.merge(compra);
