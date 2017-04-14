@@ -42,7 +42,7 @@ import py.pol.una.ii.pw.service.VentaRegistration;
  * <p/>
  * This class produces a RESTful service to read/write the contents of the ventas table.
  */
-@Path("/ventas")
+@Path("/ventasMasivas")
 @RequestScoped
 public class VentaResourceRESTService {
     @Inject

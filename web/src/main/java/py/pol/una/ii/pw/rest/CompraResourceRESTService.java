@@ -45,7 +45,7 @@ import py.pol.una.ii.pw.service.CompraRegistration;
  * <p/>
  * This class produces a RESTful service to read/write the contents of the compras table.
  */
-@Path("/compras")
+@Path("/comprasMasivas")
 @RequestScoped
 public class CompraResourceRESTService {
     @Inject
