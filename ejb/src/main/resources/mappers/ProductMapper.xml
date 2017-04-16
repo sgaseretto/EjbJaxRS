@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="py.pol.una.ii.pw.mappers.ProductMapper">
+
+    <select id='findById' parameterType='long' resultType='py.pol.una.ii.pw.model.Product'>
+       SELECT id,name, price_value as price,descripcion FROM PRODUCT
+        WHERE id = #{id}
+    </select>
+
+    <select id='findByName' parameterType='string' resultType='py.pol.una.ii.pw.model.Product'>
+       SELECT id,name, price_value as price,descripcion FROM PRODUCT
+        WHERE NAME = #{name}
+    </select>
+
+    <select id='findAllOrderedByName' resultType='py.pol.una.ii.pw.model.Product'>
+        SELECT id,name, price_value as price,descripcion FROM PRODUCT ORDER BY name
+    </select>
+
+    <select id="findByNameAndDescription" resultType="py.pol.una.ii.pw.model.Product" parameterType="map">
+        SELECT id,name, price_value as price,descripcion FROM PRODUCT
+        <where>
+            <if test="name != null">
+                name = #{name}
+            </if>
+            <if test="descripcion != null">
+                AND descripcion = #{descripcion}
+            </if>
+        </where>
+    </select>
+
+    <insert id='insert' parameterType='Product' useGeneratedKeys="true" keyProperty='id'>
+        INSERT INTO PRODUCT(name, price_value,descripcion)
+        VALUES(#{name}, #{price},#{descripcion})
+    </insert>
+
+    <update id='update' parameterType='Product'>
+        UPDATE PRODUCT SET
+        NAME= #{name},
+        PRICE_VALUE = #{price},
+        DESCRIPCION = #{descripcion}
+        WHERE ID = #{id}
+    </update>
+
+    <delete id='delete' parameterType='long'>
+        DELETE FROM PRODUCT WHERE id = #{id}
+    </delete>
+
+</mapper>

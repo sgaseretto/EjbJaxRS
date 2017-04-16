@@ -16,12 +16,13 @@
  */
 package py.pol.una.ii.pw.service;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProductMapper;
 import py.pol.una.ii.pw.model.Product;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
@@ -31,29 +32,42 @@ public class ProductRegistration {
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<Product> productEventSrc;
-
     public void register(Product product) throws Exception {
-        log.info("Registering " + product.getName());
-        em.persist(product);
-        productEventSrc.fire(product);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            productMapper.insert(product);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude insertar correctamente" + e.getMessage());
+        } finally {
+            sqlSession.close();
+        }
     }
-    
-    public void update(Product producto) throws Exception {
-        log.info("Updating " + producto.getName());
-        
-        em.merge(producto);
-        em.flush();
-        productEventSrc.fire(producto);
+
+    public void update(Product product) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            productMapper.update(product);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude actualizar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
-    
-    public void delete(Product producto) throws Exception {
-        log.info("Deleting " + producto.getName());
-        em.remove(em.contains(producto) ? producto : em.merge(producto));
-        em.flush();
+
+    public void delete(Product product) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            productMapper.delete(product.getId());
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude eliminar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
 }

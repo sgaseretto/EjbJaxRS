@@ -18,63 +18,63 @@ package py.pol.una.ii.pw.data;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
-import py.pol.una.ii.pw.model.Customer;
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProductMapper;
 import py.pol.una.ii.pw.model.Product;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 @ApplicationScoped
 public class ProductRepository {
-
     @Inject
-    private EntityManager em;
+    private Logger log;
+
 
     public Product findById(Long id) {
-        return em.find(Product.class, id);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            return productMapper.findById(id);
+        }finally {
+            sqlSession.close();
+        }
     }
 
     public Product findByName(String name) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Product> criteria = cb.createQuery(Product.class);
-        Root<Product> product = criteria.from(Product.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(member).where(cb.equal(member.get(Member_.email), email));
-        criteria.select(product).where(cb.equal(product.get("name"), name));
-        return em.createQuery(criteria).getSingleResult();
-    }
-    
-    public List<Product> findByNameAndDescription(String name,String descripcion) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Product> criteria = cb.createQuery(Product.class);
-        Root<Product> producto = criteria.from(Product.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(producto).where(cb.equal                m (producto.get(Product.descripcion), descripcion));
-        if(name==null){
-        	 criteria.select(producto).where(cb.equal(producto.get("descripcion"), descripcion));
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            return productMapper.findByName(name);
+        } finally {
+            sqlSession.close();
         }
-        else if(descripcion==null){
-        	criteria.select(producto).where(cb.equal(producto.get("name"), name));
-        }
-        else if(name != null && descripcion!=null){
-        criteria.select(producto).where(cb.equal(producto.get("name"), name),cb.equal(producto.get("descripcion"), descripcion));
-        }
-        return em.createQuery(criteria).getResultList();
     }
 
+    public List<Product> findByNameAndDescription(String name,String descripcion) {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("name", name);
+            map.put("descripcion", descripcion);
+            return productMapper.findByNameAndDescription(map);
+        } finally {
+            sqlSession.close();
+        }
+    }
+
+
     public List<Product> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Product> criteria = cb.createQuery(Product.class);
-        Root<Product> product = criteria.from(Product.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(product).orderBy(cb.asc(product.get(Product_.name)));
-        criteria.select(product).orderBy(cb.asc(product.get("name")));
-        return em.createQuery(criteria).getResultList();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
+            return productMapper.findAllOrderedByName();
+        } finally {
+            sqlSession.close();
+        }
     }
 }
