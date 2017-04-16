@@ -18,65 +18,63 @@ package py.pol.una.ii.pw.data;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
-
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProviderMapper;
 import py.pol.una.ii.pw.model.Provider;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 @ApplicationScoped
 public class ProviderRepository {
-
     @Inject
-    private EntityManager em;
+    private Logger log;
+
 
     public Provider findById(Long id) {
-        return em.find(Provider.class, id);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            return providerMapper.findById(id);
+        }finally {
+            sqlSession.close();
+        }
     }
 
     public Provider findByEmail(String email) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(member).where(cb.equal(member.get(Member_.email), email));
-        criteria.select(provider).where(cb.equal(provider.get("email"), email));
-        return em.createQuery(criteria).getSingleResult();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            return providerMapper.findByEmail(email);
+        } finally {
+            sqlSession.close();
+        }
     }
-    
+
     public List<Provider> findByNameAndEmail(String name,String email) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(customer).where(cb.equal                m (customer.get(Customer.email), email));
-        if(name==null){
-        	 criteria.select(provider).where(cb.equal(provider.get("email"), email));
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("name", name);
+            map.put("email", email);
+            return providerMapper.findByNameAndEmail(map);
+        } finally {
+            sqlSession.close();
         }
-        else if(email==null){
-        	criteria.select(provider).where(cb.equal(provider.get("name"), name));
-        }
-        else if(name != null && email!=null){
-        criteria.select(provider).where(cb.equal(provider.get("name"), name),cb.equal(provider.get("email"), email));
-        }
-        return em.createQuery(criteria).getResultList();
     }
 
 
     public List<Provider> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Provider> criteria = cb.createQuery(Provider.class);
-        Root<Provider> provider = criteria.from(Provider.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(provider).orderBy(cb.asc(provider.get(Provider_.name)));
-        criteria.select(provider).orderBy(cb.asc(provider.get("name")));
-        return em.createQuery(criteria).getResultList();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            return providerMapper.findAllOrderedByName();
+        } finally {
+            sqlSession.close();
+        }
     }
 }

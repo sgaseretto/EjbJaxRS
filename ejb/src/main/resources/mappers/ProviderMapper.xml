@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="py.pol.una.ii.pw.mappers.ProviderMapper">
+
+    <select id='findById' parameterType='long' resultType='py.pol.una.ii.pw.model.Provider'>
+        SELECT id,name,email,phone_number as phoneNumber FROM PROVIDER
+        WHERE id = #{id}
+    </select>
+
+    <select id='findByEmail' parameterType='string' resultType='py.pol.una.ii.pw.model.Provider'>
+        SELECT id,name,email,phone_number as phoneNumber FROM PROVIDER
+        WHERE EMAIL = #{email}
+    </select>
+
+    <select id='findAllOrderedByName' resultType='py.pol.una.ii.pw.model.Provider'>
+        SELECT id,name,email,phone_number as phoneNumber FROM PROVIDER ORDER BY name
+    </select>
+
+    <select id="findByNameAndEmail" resultType="py.pol.una.ii.pw.model.Provider" parameterType="map">
+        SELECT id,name,email,phone_number as phoneNumber FROM PROVIDER
+        <where>
+            <if test="name != null">
+                name = #{name}
+            </if>
+            <if test="email != null">
+                AND email = #{email}
+            </if>
+        </where>
+    </select>
+
+    <insert id='insert' parameterType='Provider' useGeneratedKeys="true" keyProperty='id'>
+        INSERT INTO PROVIDER(name, email, phone_number)
+        VALUES(#{name}, #{email}, #{phoneNumber})
+    </insert>
+
+    <update id='update' parameterType='Provider'>
+        UPDATE PROVIDER SET
+        NAME= #{name},
+        EMAIL = #{email},
+        PHONE_NUMBER = #{phoneNumber}
+        WHERE ID = #{id}
+    </update>
+
+    <delete id='delete' parameterType='long'>
+        DELETE FROM PROVIDER WHERE id = #{id}
+    </delete>
+
+</mapper>

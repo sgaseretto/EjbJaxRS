@@ -17,13 +17,15 @@
 package py.pol.una.ii.pw.service;
 
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProductMapper;
+import py.pol.una.ii.pw.mappers.ProviderMapper;
+import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.model.Provider;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
@@ -33,30 +35,43 @@ public class ProviderRegistration {
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<Provider> providerEventSrc;
-
     public void register(Provider provider) throws Exception {
-        log.info("Registering " + provider.getName());
-        em.persist(provider);
-        providerEventSrc.fire(provider);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            providerMapper.insert(provider);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude insertar correctamente" + e.getMessage());
+        } finally {
+            sqlSession.close();
+        }
     }
-    
+
     public void update(Provider provider) throws Exception {
-        log.info("Updating " + provider.getName());
-        
-        em.merge(provider);
-        em.flush();
-        providerEventSrc.fire(provider);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            providerMapper.update(provider);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude actualizar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
-    
+
     public void delete(Provider provider) throws Exception {
-        log.info("Updating " + provider.getName());
-        em.remove(em.contains(provider) ? provider : em.merge(provider));
-        em.flush();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
+            providerMapper.delete(provider.getId());
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude eliminar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
 }
 
