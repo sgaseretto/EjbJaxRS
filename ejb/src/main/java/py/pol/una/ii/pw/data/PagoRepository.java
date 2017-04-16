@@ -3,33 +3,33 @@ package py.pol.una.ii.pw.data;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.PagoMapper;
 import py.pol.una.ii.pw.model.Pago;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 
 @ApplicationScoped
 public class PagoRepository {
 
-    @Inject
-    private EntityManager em;
-
     public Pago findById(Long id) {
-        return em.find(Pago.class, id);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            PagoMapper pagoMapper = sqlSession.getMapper(PagoMapper.class);
+            return pagoMapper.findById(id);
+        }finally {
+            sqlSession.close();
+        }
     }
-    
+
     public List<Pago> findAllOrderedById() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Pago> criteria = cb.createQuery(Pago.class);
-        Root<Pago> pago = criteria.from(Pago.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(pago).orderBy(cb.asc(pago.get(Pago_.id)));
-        criteria.select(pago).orderBy(cb.asc(pago.get("id")));
-        return em.createQuery(criteria).getResultList();
-}
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            PagoMapper pagoMapper = sqlSession.getMapper(PagoMapper.class);
+            return pagoMapper.findAllOrderedById();
+        } finally {
+            sqlSession.close();
+        }
+    }
 }

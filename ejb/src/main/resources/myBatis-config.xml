@@ -7,6 +7,7 @@
         <typeAlias type='py.pol.una.ii.pw.model.Customer' alias='Customer'></typeAlias>
         <typeAlias type='py.pol.una.ii.pw.model.Product' alias='Product'></typeAlias>
         <typeAlias type='py.pol.una.ii.pw.model.Provider' alias='Provider'></typeAlias>
+        <typeAlias type='py.pol.una.ii.pw.model.Pago' alias='Pago'></typeAlias>
     </typeAliases>
     <environments default="development">
         <environment id="development">
@@ -20,5 +21,6 @@
         <mapper resource="mappers/CustomerMapper.xml"/>
         <mapper resource="mappers/ProductMapper.xml"/>
         <mapper resource="mappers/ProviderMapper.xml"/>
+        <mapper resource="mappers/PagoMapper.xml"/>
     </mappers>
 </configuration>

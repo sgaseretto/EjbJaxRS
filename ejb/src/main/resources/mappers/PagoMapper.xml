@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="py.pol.una.ii.pw.mappers.PagoMapper">
+    
+    
+    <resultMap id="PagoResult" type="Pago">
+        <id property="id" column="id_pago"></id>
+        <result property="fecha" column="fecha_pago"></result>
+        <result property="monto" column="monto_pago"></result>
+        <association property="customer" resultMap="CustomerResult"></association>
+    </resultMap>
+
+    <resultMap id="CustomerResult" type="Customer">
+        <id property="id" column="id_customer"></id>
+        <result property="name" column="name_customer"></result>
+        <result property="email" column="email_customer"></result>
+        <result property="phoneNumber" column="phone_number_customer"></result>
+        <result property="cuenta" column="cuenta_customer"></result>
+    </resultMap>
+
+    <select id='findAllOrderedById' resultMap="PagoResult">
+         SELECT p.id as id_pago,p.fecha as fecha_pago,p.monto as monto_pago,p.id_customer as id_customer,
+         c.name as name_customer,c.email as email_customer,c.phone_number as phone_number_customer, c.cuenta as cuenta_customer
+         FROM PAGO p left outer join CUSTOMER c ON p.id_customer = c.id
+    </select>
+
+    <select id='findById' resultMap="PagoResult">
+        SELECT p.id as id_pago,p.fecha as fecha_pago,p.monto as monto_pago,p.id_customer as id_customer,
+        c.name as name_customer,c.email as email_customer,c.phone_number as phone_number_customer, c.cuenta as cuenta_customer
+        FROM PAGO p left outer join CUSTOMER c ON p.id_customer = c.id
+        Where p.id = #{id}
+    </select>
+
+    <insert id='insert' parameterType='Pago' useGeneratedKeys="true" keyProperty='id'>
+        INSERT INTO PAGO(fecha, id_customer,monto)
+        VALUES(#{fecha}, #{customer.id},#{monto})
+    </insert>
+
+
+</mapper>
