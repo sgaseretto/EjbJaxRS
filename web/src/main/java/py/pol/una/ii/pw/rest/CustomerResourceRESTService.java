@@ -69,7 +69,7 @@ public class CustomerResourceRESTService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Customer> listAllMembers() {
+    public List<Customer> listAllCustomers() {
         return repository.findAllOrderedByName();
     }
 
@@ -103,19 +103,14 @@ public class CustomerResourceRESTService {
     public Customer DeleteCustomer(@PathParam("id") long id) throws Exception{
     	Customer customer = repository.findById(id);
     	try{
-    	
     	  if (customer == null) {
               throw new WebApplicationException(Response.Status.NOT_FOUND);
           }
-    	
-    	
     	registration.delete(customer);
-    	log.info("Updating " + customer.getName());
     	}
     	catch(Exception e){
+    	    log.info("no se pude eliminar el customer " + e.getMessage());
     	}
-    	
-    	
     	return customer;
     	
     }
@@ -127,7 +122,7 @@ public class CustomerResourceRESTService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createMember(Customer customer) {
+    public Response createCustomer(Customer customer) {
 
         Response.ResponseBuilder builder = null;
 
@@ -181,7 +176,7 @@ public class CustomerResourceRESTService {
      * exception so that it can be interpreted separately.
      * </p>
      * 
-     * @param member Member to be validated
+     * @param customer Member to be validated
      * @throws ConstraintViolationException If Bean Validation errors exist
      * @throws ValidationException If member with the same email already exists
      */

@@ -16,12 +16,13 @@
  */
 package py.pol.una.ii.pw.service;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.CustomerMapper;
 import py.pol.una.ii.pw.model.Customer;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import java.util.logging.Logger;
 
@@ -32,29 +33,42 @@ public class CustomerRegistration {
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<Customer> customerEventSrc;
-
     public void register(Customer customer) throws Exception {
-        log.info("Registering " + customer.getName());
-        em.persist(customer);
-        customerEventSrc.fire(customer);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
+            customerMapper.insert(customer);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude insertar correctamente" + e.getMessage());
+        } finally {
+            sqlSession.close();
+        }
     }
     
     public void update(Customer customer) throws Exception {
-        log.info("Updating " + customer.getName());
-        
-        em.merge(customer);
-        em.flush();
-        customerEventSrc.fire(customer);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
+            customerMapper.update(customer);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude actualizar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
     
     public void delete(Customer customer) throws Exception {
-        log.info("Updating " + customer.getName());
-        em.remove(em.contains(customer) ? customer : em.merge(customer));
-        em.flush();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
+            customerMapper.delete(customer.getId());
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude eliminar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
 }
