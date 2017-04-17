@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="py.pol.una.ii.pw.mappers.VentaMasivaMapper">
+
+
+    <resultMap id="VentaResult" type="Venta">
+        <id property="id" column="id_venta"></id>
+        <association property="customer" resultMap="CustomerResult"></association>
+        <collection property="productos" ofType="ArrayList" resultMap="ProductoCompradoResult"></collection>
+    </resultMap>
+
+    <resultMap id="CustomerResult" type="Customer">
+        <id property="id" column="id_customer"></id>
+        <result property="name" column="name_customer"></result>
+        <result property="email" column="email_customer"></result>
+        <result property="phoneNumber" column="phone_number_customer"></result>
+    </resultMap>
+
+    <resultMap id="ProductoCompradoResult" type="ProductoComprado">
+        <id property="id" column="id_producto_comprado"></id>
+        <result property="cantidad" column="cantidad_producto_comprado"></result>
+        <association property="producto" resultMap="ProductResult"></association>
+    </resultMap>
+
+    <resultMap id="ProductResult" type="Product">
+        <id property="id" column="id_product"></id>
+        <result property="name" column="name_product"></result>
+        <result property="price" column="price_value_product"></result>
+        <result property="descripcion" column="descripcion_product"></result>
+    </resultMap>
+
+
+    <select id='findAll' resultMap="VentaResult">
+        SELECT c.id as id_venta, pr.id as id_customer, pr.name as name_customer, pr.email as email_customer,pr.phone_number as phone_number_customer,
+        pc.id as id_producto_comprado,pc.cantidad as cantidad_producto_comprado,pc.producto as id_product,
+        p.descripcion as descripcion_product,p.name as name_product,p.price_value as price_value_product
+        FROM venta c left outer join  customer pr on c.id_customer = pr.id
+        left outer join ventas_productos on ventas_productos.id_venta = c.id
+        left outer join productocomprado pc on pc.id = ventas_productos.id_productocomprado
+        left outer join product p on pc.producto = p.id
+    </select>
+
+    <select id='findById' resultMap="VentaResult">
+       SELECT c.id as id_venta, pr.id as id_customer, pr.name as name_customer, pr.email as email_customer,pr.phone_number as phone_number_customer,
+        pc.id as id_producto_comprado,pc.cantidad as cantidad_producto_comprado,pc.producto as id_product,
+        p.descripcion as descripcion_product,p.name as name_product,p.price_value as price_value_product
+        FROM venta c left outer join  customer pr on c.id_customer = pr.id
+        left outer join ventas_productos on ventas_productos.id_venta = c.id
+        left outer join productocomprado pc on pc.id = ventas_productos.id_productocomprado
+        left outer join product p on pc.producto = p.id
+        Where c.id = #{id}
+
+    </select>
+
+    <select id='listar' parameterType="map" resultMap="VentaResult">
+        SELECT c.id as id_venta, pr.id as id_customer, pr.name as name_customer, pr.email as email_customer,pr.phone_number as phone_number_customer,
+        pc.id as id_producto_comprado,pc.cantidad as cantidad_producto_comprado,pc.producto as id_product,
+        p.descripcion as descripcion_product,p.name as name_product,p.price_value as price_value_product
+        FROM (select * from venta limit #{cantidad} offset #{inicio}) as c
+        left outer join  customer pr on c.id_customer = pr.id
+        left outer join ventas_productos on ventas_productos.id_venta = c.id
+        left outer join productocomprado pc on pc.id = ventas_productos.id_productocomprado
+        left outer join product p on pc.producto = p.id
+    </select>
+
+
+
+    <select id='getTamanoLista' resultType="int">
+        SELECT count(u) FROM Venta u
+    </select>
+
+    <insert id='insert' parameterType='Venta' useGeneratedKeys="true" keyProperty='id'>
+        INSERT INTO VENTA (id_customer)
+        VALUES(#{customer.id})
+    </insert>
+
+    <delete id='delete' parameterType='long'>
+        DELETE FROM VENTA WHERE id = #{id}
+    </delete>
+
+    <insert id='insertProductComprado' parameterType='ProductoComprado' useGeneratedKeys="true" keyProperty='id'>
+        INSERT INTO PRODUCTOCOMPRADO(producto,cantidad)
+        VALUES(#{producto.id},#{cantidad})
+    </insert>
+
+    <insert id='insertProduct' parameterType='map' >
+        INSERT INTO VENTAS_PRODUCTOS (id_venta, id_productocomprado)
+        VALUES (#{id_venta}, #{id_productocomprado});
+    </insert>
+
+
+
+
+
+
+</mapper>

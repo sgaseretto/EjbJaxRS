@@ -1,28 +1,28 @@
 package py.pol.una.ii.pw.service;
 
-import com.google.gson.Gson;
-import py.pol.una.ii.pw.data.CustomerRepository;
-import py.pol.una.ii.pw.data.ProductRepository;
-import py.pol.una.ii.pw.model.*;
+
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.VentaMasivaMapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.EJBContext;
-import javax.ejb.Remove;
 import javax.ejb.Stateful;
-import javax.ejb.StatefulTimeout;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.UserTransaction;
+
+import com.google.gson.Gson;
+import py.pol.una.ii.pw.model.ProductoComprado;
+import py.pol.una.ii.pw.model.Venta;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
@@ -33,35 +33,19 @@ public class VentaRegistration{
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<Venta> ventaEventSrc;
-    
-    @Inject
-    private CustomerRegistration regCliente;
-
-    @Inject
-    private CustomerRepository repoCustomer;
-
-    @Inject
-    private ProductRepository repoProduct;
-
     @Resource
     private UserTransaction transaccion;
 
     private Venta venta_en_proceso;
-    
-    private Customer customer;
-    
-    
+
     @PostConstruct
     private void init(){
         venta_en_proceso = new Venta();
     }
 
+
     public void ventaFile(String fileName) throws Exception{
+
         boolean fallo = false;
         transaccion.begin();
         Gson gson = new Gson();
@@ -74,11 +58,11 @@ public class VentaRegistration{
 
                 try{
                     venta_en_proceso= gson.fromJson(sCurrentLine, Venta.class);
-                    System.out.println("se ha registrado la venta:"+i+ "  " +venta_en_proceso);
-                    em.persist(venta_en_proceso);
+                    register(venta_en_proceso);
+                    System.out.println("se ha registrado la compra:"+i+ "  " + venta_en_proceso);
                     i++;
                 }catch(Exception e){
-                    System.out.println("error al cargar las ventas");
+                    System.out.println("error al cargar las compras");
 
                     transaccion.rollback();
                     fallo=true;
@@ -96,35 +80,77 @@ public class VentaRegistration{
         }
     }
 
+    public void register(Venta venta) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
+            ventaMapper.insert(venta);
+            for(ProductoComprado productoComprado: venta.getProductos()){
+                ventaMapper.insertProductComprado(productoComprado);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("id_venta", venta.getId());
+                map.put("id_productocomprado", productoComprado.getId());
+                ventaMapper.insertProduct(map);
+            }
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude insertar correctamente" + e.getMessage());
+        } finally {
+            sqlSession.close();
+        }
+    }
 
     public int getTamanoLista() {
-        return em.createNamedQuery( "Venta.tamano", Long.class )
-                .getSingleResult().intValue();
+
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
+            return ventaMapper.getTamanoLista();
+        }finally {
+            sqlSession.close();
+        }
     }
 
     public List<Venta> listar(int inicio, int cantidad ) {
-        return em.createNamedQuery( "Venta.listar" )
-                .setFirstResult( inicio )
-                .setMaxResults( cantidad )
-                .getResultList();
+
+
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("inicio", inicio);
+            map.put("cantidad", cantidad);
+            return ventaMapper.listar(map);
+        }finally {
+            sqlSession.close();
+        }
     }
-
-
-
 
 
     public void update(Venta venta) throws Exception {
-    	log.info("Actualizando Venta, el nuevo nombre es: " + venta.getId());
-    	em.merge(venta);
-    	em.flush();
-    	ventaEventSrc.fire(venta);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
+            ventaMapper.update(venta);
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude actualizar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
-    
-    public void remove(Venta venta) throws Exception {
-    	venta = em.merge(venta);
-    	em.remove(venta);
-    	em.flush();
+
+    public void delete(Venta venta) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
+            ventaMapper.delete(venta.getId());
+            sqlSession.commit();
+        }catch(Exception e){
+            log.info("No se pude eliminar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
-    
+
 }
-    

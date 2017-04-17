@@ -3,7 +3,6 @@ package py.pol.una.ii.pw.service;
 
 import org.apache.ibatis.session.SqlSession;
 import py.pol.una.ii.pw.mappers.CompraMasivaMapper;
-import py.pol.una.ii.pw.mappers.CustomerMapper;
 import py.pol.una.ii.pw.model.Compra;
 
 import javax.annotation.PostConstruct;
@@ -11,9 +10,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateful;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.UserTransaction;
 
 import com.google.gson.Gson;
@@ -36,19 +33,11 @@ public class CompraRegistration{
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<Compra> compraEventSrc;
-
     @Resource
     private UserTransaction transaccion;
 
     private Compra compra_en_proceso;
-    
-    
-    
+
     @PostConstruct
     private void init(){
     	compra_en_proceso = new Compra();

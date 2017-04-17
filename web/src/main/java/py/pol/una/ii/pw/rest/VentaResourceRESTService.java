@@ -279,7 +279,7 @@ public class VentaResourceRESTService {
         Venta venta = null;
     	try {
         	venta = repository.findById(id);
-        	registration.remove(venta);
+        	registration.delete(venta);
             if (venta == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }

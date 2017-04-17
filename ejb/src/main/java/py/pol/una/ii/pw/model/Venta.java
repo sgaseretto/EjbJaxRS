@@ -22,11 +22,12 @@ public class Venta implements Serializable {
     private Long id;
 
 	@NotNull
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "id_produtos")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name = "ventas_productos", joinColumns = @JoinColumn(name = "id_Venta"), inverseJoinColumns = @JoinColumn(name = "id_ProductoComprado"))
 	private List<ProductoComprado> productos;
-   
-    @NotNull
+
+
+	@NotNull
     @ManyToOne
     @JoinColumn(name = "id_customer")
     private Customer customer;
