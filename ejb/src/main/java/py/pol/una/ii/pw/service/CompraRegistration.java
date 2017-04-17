@@ -91,9 +91,7 @@ public class CompraRegistration{
 				map.put("id_compra", compra.getId());
 				map.put("id_productocomprado", productoComprado.getId());
 				compraMapper.insertProduct(map);
-
 			}
-			sqlSession.commit();
 		}catch(Exception e){
 			log.info("No se pude insertar correctamente" + e.getMessage());
 		} finally {

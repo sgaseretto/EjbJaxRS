@@ -59,7 +59,7 @@ public class VentaRegistration{
                 try{
                     venta_en_proceso= gson.fromJson(sCurrentLine, Venta.class);
                     register(venta_en_proceso);
-                    System.out.println("se ha registrado la compra:"+i+ "  " + venta_en_proceso);
+                    System.out.println("se ha registrado la venta:"+i+ "  " + venta_en_proceso);
                     i++;
                 }catch(Exception e){
                     System.out.println("error al cargar las compras");
@@ -92,7 +92,6 @@ public class VentaRegistration{
                 map.put("id_productocomprado", productoComprado.getId());
                 ventaMapper.insertProduct(map);
             }
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
         } finally {
