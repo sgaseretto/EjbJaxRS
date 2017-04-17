@@ -10,28 +10,32 @@ import javax.persistence.criteria.Root;
 
 import java.util.List;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.CompraMasivaMapper;
+import py.pol.una.ii.pw.mappers.CustomerMapper;
 import py.pol.una.ii.pw.model.Compra;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 @ApplicationScoped
 public class CompraRepository {
 
-    @Inject
-    private EntityManager em;
-
-    public Compra findById(Long id) {
-        return em.find(Compra.class, id);
+    public Compra findById(Long id){
+    SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+    try {
+        CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+        return compraMapper.findById(id);
+    }finally {
+        sqlSession.close();
     }
+}
 
-    
     public List<Compra> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Compra> criteria = cb.createQuery(Compra.class);
-        Root<Compra> compra = criteria.from(Compra.class);
-        // Swap criteria statements if you would like to try out type-safe criteria queries, a new
-        // feature in JPA 2.0
-        // criteria.select(compra).orderBy(cb.asc(compra.get(Compra_.name)));
-        criteria.select(compra).orderBy(cb.asc(compra.get("id")));
-        return em.createQuery(criteria).getResultList();
-
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+            return compraMapper.findAll();
+        } finally {
+            sqlSession.close();
+        }
     }
 }

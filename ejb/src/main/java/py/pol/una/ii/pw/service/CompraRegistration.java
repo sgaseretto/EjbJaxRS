@@ -1,33 +1,31 @@
 
 package py.pol.una.ii.pw.service;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.CompraMasivaMapper;
+import py.pol.una.ii.pw.mappers.CustomerMapper;
 import py.pol.una.ii.pw.model.Compra;
-import py.pol.una.ii.pw.model.ProductoComprado;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.EJBContext;
-import javax.ejb.Remove;
 import javax.ejb.Stateful;
-import javax.ejb.StatefulTimeout;
-import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.enterprise.context.spi.Context;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.transaction.NotSupportedException;
-import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 import com.google.gson.Gson;
+import py.pol.una.ii.pw.model.ProductoComprado;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
@@ -71,8 +69,8 @@ public class CompraRegistration{
 
 				try{
 					compra_en_proceso= gson.fromJson(sCurrentLine, Compra.class);
+					register(compra_en_proceso);
 					System.out.println("se ha registrado la compra:"+i+ "  " + compra_en_proceso);
-					em.persist(compra_en_proceso);
 					i++;
 				}catch(Exception e){
 					System.out.println("error al cargar las compras");
@@ -93,35 +91,85 @@ public class CompraRegistration{
 		}
     }
 
+	public void register(Compra compra) throws Exception {
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+			compraMapper.insert(compra);
+			for(ProductoComprado productoComprado: compra.getProductos()){
+				compraMapper.insertProductComprado(productoComprado);
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("id_compra", compra.getId());
+				map.put("id_productocomprado", productoComprado.getId());
+				compraMapper.insertProduct(map);
+
+			}
+			sqlSession.commit();
+		}catch(Exception e){
+			log.info("No se pude insertar correctamente" + e.getMessage());
+		} finally {
+			sqlSession.close();
+		}
+	}
+
 	public int getTamanoLista() {
-		return em.createNamedQuery( "Compra.tamano", Long.class )
-				.getSingleResult().intValue();
+
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+			return compraMapper.getTamanoLista();
+		}finally {
+			sqlSession.close();
+		}
+		/*return em.createNamedQuery( "Compra.tamano", Long.class )
+				.getSingleResult().intValue();*/
 	}
 
 	public List<Compra> listar(int inicio, int cantidad ) {
-		return em.createNamedQuery( "Compra.listar" )
+
+
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("inicio", inicio);
+			map.put("cantidad", cantidad);
+			return compraMapper.listar(map);
+		}finally {
+			sqlSession.close();
+		}
+
+		/* return em.createNamedQuery( "Compra.listar" )
 				.setFirstResult( inicio )
 				.setMaxResults( cantidad )
-				.getResultList();
+				.getResultList();*/
 	}
-    
-    
-    
-    
 
-    
 
-    public void update(Compra compra) throws Exception {
-    	log.info("Actualizando Compra, el nuevo nombre es: " + compra.getId());
-    	em.merge(compra);
-    	em.flush();
-    	compraEventSrc.fire(compra);
-    }
-    
-    public void remove(Compra compra) throws Exception {
-    	compra = em.merge(compra);
-    	em.remove(compra);
-    	em.flush();
-    }
+	public void update(Compra compra) throws Exception {
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+			compraMapper.update(compra);
+			sqlSession.commit();
+		}catch(Exception e){
+			log.info("No se pude actualizar correctamente" + e.getMessage());
+		}finally {
+			sqlSession.close();
+		}
+	}
+
+	public void delete(Compra compra) throws Exception {
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+			compraMapper.delete(compra.getId());
+			sqlSession.commit();
+		}catch(Exception e){
+			log.info("No se pude eliminar correctamente" + e.getMessage());
+		}finally {
+			sqlSession.close();
+		}
+	}
     
 }

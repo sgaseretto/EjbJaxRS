@@ -45,7 +45,7 @@ import py.pol.una.ii.pw.service.CompraRegistration;
  * <p/>
  * This class produces a RESTful service to read/write the contents of the compras table.
  */
-@Path("/comprasMasivas")
+@Path("/comprasmasivas")
 @RequestScoped
 public class CompraResourceRESTService {
     @Inject
@@ -152,8 +152,6 @@ public class CompraResourceRESTService {
          fop.close();
      }
 
-
-
     protected Response.ResponseBuilder getNoCacheResponseBuilder( Response.Status status ) {
         CacheControl cc = new CacheControl();
         cc.setNoCache( true );
@@ -182,7 +180,6 @@ public class CompraResourceRESTService {
                 try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os ) ) ) ) {
 
                     writer.print( "[" );
-
                     while ( tamanoTotalLista > 0 ) {
                         // Conseguir los datos paginados de la BD
                         List<Compra> compras = registration.listar( inicio, tamano );
@@ -191,29 +188,21 @@ public class CompraResourceRESTService {
                             if ( inicio > 0 ) {
                                 writer.print( "," );
                             }
-
                             // Stream de los datos en json
-
                             writer.print(gs.toJson(compra));
 
                             // Aumentar la posicion de la pagina
                             inicio++;
                         }
-
                         // Actualizar el numero de datos restantes
                         tamanoTotalLista -= tamano;
                     }
-
                     // Se termina el json
                     writer.print( "]" );
                 }
             }
         } ).build();
     }
-
-
-
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -289,7 +278,7 @@ public class CompraResourceRESTService {
         Compra compra = null;
     	try {
         	compra = repository.findById(id);
-        	registration.remove(compra);
+        	registration.delete(compra);
             if (compra == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
