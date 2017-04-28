@@ -6,7 +6,7 @@ import py.pol.una.ii.pw.mappers.VentaMasivaMapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
-@Stateful
+@Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 public class VentaRegistration{
 
@@ -45,7 +45,6 @@ public class VentaRegistration{
 
 
     public void ventaFile(String fileName) throws Exception{
-
         boolean fallo = false;
         transaccion.begin();
         Gson gson = new Gson();
@@ -79,6 +78,15 @@ public class VentaRegistration{
             }catch (Exception e){
                 System.out.println("Error al hacer commit");
             }
+        }
+    }
+
+    public void registerVenta(Venta venta) throws Exception{
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            register(venta,sqlSession);
+        }finally {
+            sqlSession.close();
         }
     }
 

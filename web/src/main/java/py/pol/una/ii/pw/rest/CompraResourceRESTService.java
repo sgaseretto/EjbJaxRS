@@ -66,7 +66,6 @@ public class CompraResourceRESTService {
    
    
      @POST
-     @Path("/upload")
      @Consumes(MediaType.MULTIPART_FORM_DATA)
      public Response uploadFile(MultipartFormDataInput input) throws IOException {
           
@@ -163,7 +162,6 @@ public class CompraResourceRESTService {
 
 
     @GET
-    @Path( "/download" )
     @Produces( "application/json" )
     public Response streamGenerateCompras() {
 

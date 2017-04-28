@@ -7,7 +7,7 @@ import py.pol.una.ii.pw.model.Compra;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
-@Stateful
+@Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CompraRegistration{
 
@@ -81,6 +81,15 @@ public class CompraRegistration{
 			}
 		}
     }
+
+	public void registerCompra(Compra compra) throws Exception{
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+		try {
+			register(compra,sqlSession);
+		}finally {
+			sqlSession.close();
+		}
+	}
 
 	public void register(Compra compra,SqlSession sqlSession) throws Exception {
 
