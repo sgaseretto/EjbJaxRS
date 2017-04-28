@@ -40,7 +40,6 @@ public class ProviderRegistration {
         try {
             ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
             providerMapper.insert(provider);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
         } finally {
@@ -53,7 +52,6 @@ public class ProviderRegistration {
         try {
             ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
             providerMapper.update(provider);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude actualizar correctamente" + e.getMessage());
         }finally {
@@ -66,7 +64,6 @@ public class ProviderRegistration {
         try {
             ProviderMapper providerMapper = sqlSession.getMapper(ProviderMapper.class);
             providerMapper.delete(provider.getId());
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude eliminar correctamente" + e.getMessage());
         }finally {

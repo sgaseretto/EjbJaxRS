@@ -37,7 +37,6 @@ public class ProductRegistration {
         try {
             ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
             productMapper.insert(product);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
         } finally {
@@ -50,7 +49,6 @@ public class ProductRegistration {
         try {
             ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
             productMapper.update(product);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude actualizar correctamente" + e.getMessage());
         }finally {
@@ -63,7 +61,6 @@ public class ProductRegistration {
         try {
             ProductMapper productMapper = sqlSession.getMapper(ProductMapper.class);
             productMapper.delete(product.getId());
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude eliminar correctamente" + e.getMessage());
         }finally {

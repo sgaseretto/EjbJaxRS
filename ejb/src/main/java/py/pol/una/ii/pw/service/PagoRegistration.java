@@ -36,7 +36,6 @@ public class PagoRegistration {
         try {
             PagoMapper pagoMapper = sqlSession.getMapper(PagoMapper.class);
             pagoMapper.insert(pago);
-            sqlSession.commit();
             customer = pago.getCustomer();
             customer = repoCliente.findById(customer.getId());
             if (customer.getCuenta() > pago.getMonto()){
@@ -49,8 +48,6 @@ public class PagoRegistration {
             }
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
-        } finally {
-            sqlSession.close();
         }
     }
 }

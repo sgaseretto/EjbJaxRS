@@ -38,7 +38,6 @@ public class CustomerRegistration {
         try {
             CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
             customerMapper.insert(customer);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
         } finally {
@@ -51,7 +50,6 @@ public class CustomerRegistration {
         try {
             CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
             customerMapper.update(customer);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude actualizar correctamente" + e.getMessage());
         }finally {
@@ -64,7 +62,6 @@ public class CustomerRegistration {
         try {
             CustomerMapper customerMapper = sqlSession.getMapper(CustomerMapper.class);
             customerMapper.delete(customer.getId());
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude eliminar correctamente" + e.getMessage());
         }finally {

@@ -50,15 +50,15 @@ public class VentaRegistration{
         transaccion.begin();
         Gson gson = new Gson();
         System.out.println("el directorio"+fileName);
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-
             String sCurrentLine;
             int i =1;
             while ((sCurrentLine = br.readLine()) != null && fallo != true) {
 
                 try{
                     venta_en_proceso= gson.fromJson(sCurrentLine, Venta.class);
-                    register(venta_en_proceso);
+                    register(venta_en_proceso,sqlSession);
                     System.out.println("se ha registrado la venta:"+i+ "  " + venta_en_proceso);
                     i++;
                 }catch(Exception e){
@@ -70,6 +70,8 @@ public class VentaRegistration{
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            sqlSession.close();
         }
         if(fallo==false) {
             try {
@@ -80,8 +82,8 @@ public class VentaRegistration{
         }
     }
 
-    public void register(Venta venta) throws Exception {
-        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+    public void register(Venta venta,SqlSession sqlSession) throws Exception {
+
         try {
             VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
             ventaMapper.insert(venta);
@@ -94,8 +96,6 @@ public class VentaRegistration{
             }
         }catch(Exception e){
             log.info("No se pude insertar correctamente" + e.getMessage());
-        } finally {
-            sqlSession.close();
         }
     }
 
@@ -111,7 +111,6 @@ public class VentaRegistration{
     }
 
     public List<Venta> listar(int inicio, int cantidad ) {
-
 
         SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
         try {
@@ -131,7 +130,6 @@ public class VentaRegistration{
         try {
             VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
             ventaMapper.update(venta);
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude actualizar correctamente" + e.getMessage());
         }finally {
@@ -144,7 +142,6 @@ public class VentaRegistration{
         try {
             VentaMasivaMapper ventaMapper = sqlSession.getMapper(VentaMasivaMapper.class);
             ventaMapper.delete(venta.getId());
-            sqlSession.commit();
         }catch(Exception e){
             log.info("No se pude eliminar correctamente" + e.getMessage());
         }finally {

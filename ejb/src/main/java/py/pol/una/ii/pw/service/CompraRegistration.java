@@ -50,15 +50,15 @@ public class CompraRegistration{
     	transaccion.begin();
     	Gson gson = new Gson();
     	System.out.println("el directorio"+fileName);
+		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
     	try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-
 			String sCurrentLine;
 			int i =1;
 			while ((sCurrentLine = br.readLine()) != null && fallo != true) {
 
 				try{
 					compra_en_proceso= gson.fromJson(sCurrentLine, Compra.class);
-					register(compra_en_proceso);
+					register(compra_en_proceso,sqlSession);
 					System.out.println("se ha registrado la compra:"+i+ "  " + compra_en_proceso);
 					i++;
 				}catch(Exception e){
@@ -70,6 +70,8 @@ public class CompraRegistration{
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}finally {
+			sqlSession.close();
 		}
 		if(fallo==false) {
 			try {
@@ -80,8 +82,8 @@ public class CompraRegistration{
 		}
     }
 
-	public void register(Compra compra) throws Exception {
-		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+	public void register(Compra compra,SqlSession sqlSession) throws Exception {
+
 		try {
 			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
 			compraMapper.insert(compra);
@@ -94,16 +96,14 @@ public class CompraRegistration{
 			}
 		}catch(Exception e){
 			log.info("No se pude insertar correctamente" + e.getMessage());
-		} finally {
-			sqlSession.close();
 		}
 	}
 
 	public int getTamanoLista() {
 
 		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
-		try {
-			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+		try{
+		CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
 			return compraMapper.getTamanoLista();
 		}finally {
 			sqlSession.close();
@@ -114,14 +114,13 @@ public class CompraRegistration{
 
 	public List<Compra> listar(int inicio, int cantidad ) {
 
-
 		SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
-		try {
-			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("inicio", inicio);
-			map.put("cantidad", cantidad);
-			return compraMapper.listar(map);
+		try{
+		CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("inicio", inicio);
+		map.put("cantidad", cantidad);
+		return compraMapper.listar(map);
 		}finally {
 			sqlSession.close();
 		}
@@ -138,7 +137,6 @@ public class CompraRegistration{
 		try {
 			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
 			compraMapper.update(compra);
-			sqlSession.commit();
 		}catch(Exception e){
 			log.info("No se pude actualizar correctamente" + e.getMessage());
 		}finally {
@@ -151,7 +149,6 @@ public class CompraRegistration{
 		try {
 			CompraMasivaMapper compraMapper = sqlSession.getMapper(CompraMasivaMapper.class);
 			compraMapper.delete(compra.getId());
-			sqlSession.commit();
 		}catch(Exception e){
 			log.info("No se pude eliminar correctamente" + e.getMessage());
 		}finally {
