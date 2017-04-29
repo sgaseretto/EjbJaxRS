@@ -1,12 +1,30 @@
+/*
+ * JBoss, Home of Professional Open Source
+ * Copyright 2013, Red Hat, Inc. and/or its affiliates, and individual
+ * contributors by the @authors tag. See the copyright.txt in the
+ * distribution for a full listing of individual contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package py.pol.una.ii.pw.service;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProductMapper;
+import py.pol.una.ii.pw.mappers.ProductoCompradoMapper;
+import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.model.ProductoComprado;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import java.util.logging.Logger;
 
 // The @Stateless annotation eliminates the need for manual transaction demarcation
@@ -16,28 +34,27 @@ public class ProductoCompradoRegistration {
     @Inject
     private Logger log;
 
-    @Inject
-    private EntityManager em;
-
-    @Inject
-    private Event<ProductoComprado> productoEventSrc;
-
-    public void register(ProductoComprado producto) throws Exception {
-        log.info("Registrando " + producto.getId());
-        em.persist(producto);
-        productoEventSrc.fire(producto);
+    public void register(ProductoComprado productocomprado) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductoCompradoMapper productocompradoMapper = sqlSession.getMapper(ProductoCompradoMapper.class);
+            productocompradoMapper.register(productocomprado);
+        }catch(Exception e){
+            log.info("No se pude insertar correctamente" + e.getMessage());
+        } finally {
+            sqlSession.close();
+        }
     }
-    
-    public void update(ProductoComprado producto) throws Exception {
-    	log.info("Actualizando ProductoComprado, el nuevo nombre es: " + producto.getId());
-    	em.merge(producto);
-    	em.flush();
-    	productoEventSrc.fire(producto);
-    }
-    
-    public void remove(ProductoComprado producto) throws Exception {
-    	producto = em.merge(producto);
-    	em.remove(producto);
-    	em.flush();
+
+    public void delete(ProductoComprado productocomprado) throws Exception {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductoCompradoMapper productocompradoMapper = sqlSession.getMapper(ProductoCompradoMapper.class);
+            productocompradoMapper.delete(productocomprado.getId());
+        }catch(Exception e){
+            log.info("No se pude eliminar correctamente" + e.getMessage());
+        }finally {
+            sqlSession.close();
+        }
     }
 }

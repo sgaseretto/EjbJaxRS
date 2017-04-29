@@ -7,28 +7,45 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
+import org.apache.ibatis.session.SqlSession;
+import py.pol.una.ii.pw.mappers.ProductMapper;
+import py.pol.una.ii.pw.mappers.ProductoCompradoMapper;
+import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.model.ProductoComprado;
+import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 
 @ApplicationScoped
 public class ProductoCompradoRepository {
 
     @Inject
-    private EntityManager em;
+    private Logger log;
 
-    public ProductoComprado findById(Long id) {
-        return em.find(ProductoComprado.class, id);
+
+    public Product findById(Long id) {
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductoCompradoMapper productMapper = sqlSession.getMapper(ProductoCompradoMapper.class);
+            return productMapper.findById(id);
+        }finally {
+            sqlSession.close();
+        }
     }
 
+
     public List<ProductoComprado> findAllOrderedByName() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<ProductoComprado> criteria = cb.createQuery(ProductoComprado.class);
-        Root<ProductoComprado> producto = criteria.from(ProductoComprado.class);
-        criteria.select(producto).orderBy(cb.asc(producto.get("producto")));
-        
-        return em.createQuery(criteria).getResultList();
+        SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
+        try {
+            ProductoCompradoMapper productMapper = sqlSession.getMapper(ProductoCompradoMapper.class);
+            return productMapper.findAllOrderedByName();
+        } finally {
+            sqlSession.close();
+        }
     }
     
     

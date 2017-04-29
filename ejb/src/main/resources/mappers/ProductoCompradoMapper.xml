@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="py.pol.una.ii.pw.mappers.ProductoCompradoMapper">
+
+    <select id="findAllOrderedByName" flushCache="true"
+            resultMap="productoCompradoResult">
+
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="productoCompradoResult">
+
+    </select>
+
+    <resultMap id="productoCompradoResult" type="ProductoComprado">
+
+    </resultMap>
+
+    <insert id="register" parameterType="ProductoComprado" useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        INSERT INTO productocomprado (cantidad, producto)
+        VALUES (#{cantidad}, #{producto.id})
+    </insert>
+
+    <delete id="delete" parameterType="Long">
+        DELETE FROM productocomprado WHERE id = #{id}
+    </delete>
+
+
+
+</mapper>

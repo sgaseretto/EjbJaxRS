@@ -27,5 +27,6 @@
         <mapper resource="mappers/PagoMapper.xml"/>
         <mapper resource="mappers/VentaMasivaMapper.xml"/>
         <mapper resource="mappers/CompraMasivaMapper.xml"/>
+        <mapper resource="mappers/ProductoCompradoMapper.xml"/>
     </mappers>
 </configuration>
