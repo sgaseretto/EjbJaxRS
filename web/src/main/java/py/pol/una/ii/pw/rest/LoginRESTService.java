@@ -59,7 +59,7 @@ public class LoginRESTService {
                 concat = user + pass;
                 byte[] encodedBytes = Base64.encodeBase64(concat.getBytes());
                 String session_id = new String(encodedBytes);
-                return Response.status(200).entity("Su session_id es:  " + "Basic "+ session_id)
+                return Response.status(200).entity("Basic "+ session_id)
                         .build();
             }else{
                 return Response.status(200).entity("Usuario y/o password incorrectos")
