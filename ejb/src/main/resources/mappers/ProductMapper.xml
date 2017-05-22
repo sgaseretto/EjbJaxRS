@@ -22,7 +22,7 @@
         SELECT id,name, price_value as price,descripcion FROM PRODUCT
         <where>
             <if test="name != null">
-                name = #{name}
+                name = ${name}
             </if>
             <if test="descripcion != null">
                 AND descripcion = #{descripcion}

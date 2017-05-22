@@ -11,6 +11,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
@@ -41,9 +43,11 @@ public class LoginRESTService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        final StringTokenizer tokenizer = new StringTokenizer(
-                usernameAndPassword, ":");
 
+        if (usernameAndPassword!=null) {
+            final StringTokenizer tokenizer = new StringTokenizer(
+                    usernameAndPassword, ":");
+        }
         // we have fixed the userid and password as admin
         // call some UserService/LDAP here
         boolean authenticationStatus = "adminadmin".equals(usernameAndPassword);
@@ -54,12 +58,11 @@ public class LoginRESTService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response login(@FormParam("user") String user, @FormParam("password") String pass) throws IOException {
         String concat = null;
-
             if(user.equals(pass)) {
                 concat = user + pass;
-                byte[] encodedBytes = Base64.encodeBase64(concat.getBytes());
-                String session_id = new String(encodedBytes);
-                return Response.status(200).entity("Basic "+ session_id)
+               // byte[] encodedBytes = Base64.encodeBase64(concat.getBytes(),true);
+               // String session_id = new String(encodedBytes,"UTF-8");
+                return Response.status(200).entity("Basic "+ concat)
                         .build();
             }else{
                 return Response.status(200).entity("Usuario y/o password incorrectos")

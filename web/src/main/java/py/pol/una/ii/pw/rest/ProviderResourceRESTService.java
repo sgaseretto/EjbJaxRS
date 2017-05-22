@@ -124,7 +124,7 @@ public class ProviderResourceRESTService {
     @PUT
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Provider UpdateProvider(@PathParam("id") long id,Provider provider) throws Exception{
+    public Provider updateProvider(@PathParam("id") long id,Provider provider) throws Exception{
         	validateProvider(provider);
        
         	provider.setId(id);
@@ -136,19 +136,16 @@ public class ProviderResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Provider DeleteProvider(@PathParam("id") long id) throws Exception{
+    public Provider deleteProvider(@PathParam("id") long id) throws Exception{
     	Provider provider = repository.findById(id);
-    	try{
+
     	  if (provider == null) {
               throw new WebApplicationException(Response.Status.NOT_FOUND);
           }
     	registration.delete(provider);
     	log.info("Updating " + provider.getName());
-    	}
-    	catch(Exception e){
-    	}
-    	
-    	
+
+
     	return provider;
     	
     }

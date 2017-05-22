@@ -53,11 +53,12 @@ public class Pago implements Serializable {
 	}
 
 	public Date getFecha() {
-		return fecha;
+
+		return new Date(this.fecha.getTime());
 	}
 
 	public void setFecha(Date fecha) {
-		this.fecha = fecha;
+		this.fecha = new Date(fecha.getTime());
 	}
 
 	public Integer getMonto() {

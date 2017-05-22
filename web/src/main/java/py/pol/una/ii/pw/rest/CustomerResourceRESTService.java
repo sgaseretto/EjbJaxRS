@@ -87,9 +87,9 @@ public class CustomerResourceRESTService {
     @PUT
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Customer UpdateCustomer(@PathParam("id") long id,Customer customer) throws Exception{
+    public Customer updateCustomer(@PathParam("id") long id,Customer customer) throws Exception{
         	validateCustomer(customer);
-       
+
         	customer.setId(id);
             registration.update(customer);
             
@@ -100,7 +100,7 @@ public class CustomerResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Customer DeleteCustomer(@PathParam("id") long id) throws Exception{
+    public Customer deleteCustomer(@PathParam("id") long id) throws Exception{
     	Customer customer = repository.findById(id);
     	try{
     	  if (customer == null) {
