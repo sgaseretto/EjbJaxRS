@@ -101,16 +101,12 @@ public class CustomerResourceRESTService {
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
     public Customer deleteCustomer(@PathParam("id") long id) throws Exception{
-    	Customer customer = repository.findById(id);
-    	try{
+        Customer customer = repository.findById(id);
     	  if (customer == null) {
               throw new WebApplicationException(Response.Status.NOT_FOUND);
           }
     	registration.delete(customer);
-    	}
-    	catch(Exception e){
-    	    log.info("no se pude eliminar el customer " + e.getMessage());
-    	}
+
     	return customer;
     	
     }
