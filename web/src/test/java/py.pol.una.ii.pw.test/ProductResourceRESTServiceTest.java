@@ -10,7 +10,6 @@ import py.pol.una.ii.pw.model.Product;
 import py.pol.una.ii.pw.rest.ProductResourceRESTService;
 import py.pol.una.ii.pw.service.ProductRegistration;
 
-import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.validation.Validator;

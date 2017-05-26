@@ -285,18 +285,15 @@ public class CompraResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Compra deleteCompraById(@PathParam("id") long id) {
-        Compra compra = null;
-    	try {
-        	compra = repository.findById(id);
-        	registration.delete(compra);
+    public Compra deleteCompraById(@PathParam("id") long id) throws Exception {
+        Compra compra = repository.findById(id);
+
             if (compra == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
-        } catch (Exception e){
-        	log.info(e.toString());
-        	compra = null;
-        }
+        registration.delete(compra);
+        log.info("Deleting " + compra.getId());
+
         return compra;
     }
 }

@@ -148,7 +148,7 @@ public class ProductResourceRESTService {
           }
     	
     	registration.delete(producto);
-    	log.info("Updating " + producto.getName());
+    	log.info("Deleting " + producto.getName());
 
     	return producto;
     	

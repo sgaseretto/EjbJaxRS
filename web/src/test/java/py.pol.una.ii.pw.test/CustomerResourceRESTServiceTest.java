@@ -6,13 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import py.pol.una.ii.pw.data.CustomerRepository;
-import py.pol.una.ii.pw.data.ProviderRepository;
 import py.pol.una.ii.pw.model.Customer;
-import py.pol.una.ii.pw.model.Provider;
 import py.pol.una.ii.pw.rest.CustomerResourceRESTService;
-import py.pol.una.ii.pw.rest.ProviderResourceRESTService;
 import py.pol.una.ii.pw.service.CustomerRegistration;
-import py.pol.una.ii.pw.service.ProviderRegistration;
 
 import javax.validation.Validator;
 import javax.ws.rs.client.Entity;
