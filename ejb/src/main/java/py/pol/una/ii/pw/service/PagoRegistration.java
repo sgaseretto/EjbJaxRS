@@ -3,16 +3,12 @@ package py.pol.una.ii.pw.service;
 import org.apache.ibatis.session.SqlSession;
 import py.pol.una.ii.pw.data.CustomerRepository;
 import py.pol.una.ii.pw.mappers.PagoMapper;
-import py.pol.una.ii.pw.mappers.ProviderMapper;
 import py.pol.una.ii.pw.model.Customer;
 import py.pol.una.ii.pw.model.Pago;
-import py.pol.una.ii.pw.model.Provider;
 import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import java.util.logging.Logger;
 

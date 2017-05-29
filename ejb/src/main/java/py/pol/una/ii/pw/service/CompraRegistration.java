@@ -20,6 +20,8 @@ import py.pol.una.ii.pw.util.SqlSessionFactoryMyBatis;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +44,8 @@ public class CompraRegistration{
     private void init(){
     	compra_en_proceso = new Compra();
     }
-  
 
-    public void compraFile(String fileName) throws Exception{
+	public void compraFile(String fileName) throws Exception{
 
 		boolean fallo = false;
     	transaccion.begin();

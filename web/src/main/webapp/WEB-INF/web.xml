@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
-    <filter>
-        <filter-name>AuthenticationFilter</filter-name>
-        <filter-class>py.pol.una.ii.pw.rest.AuthenticationFilterRESTService</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>AuthenticationFilter</filter-name>
-        <url-pattern>/rest/*</url-pattern>
-    </filter-mapping>
+
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>pw-backend</web-resource-name>
+            <url-pattern>/rest/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>user</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+
+    <login-config>
+        <auth-method>KEYCLOAK</auth-method>
+        <realm-name>rest</realm-name>
+    </login-config>
+
+    <security-role>
+        <role-name>user</role-name>
+    </security-role>
 </web-app>
+

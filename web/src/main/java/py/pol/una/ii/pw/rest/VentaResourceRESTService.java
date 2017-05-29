@@ -1,6 +1,7 @@
 package py.pol.una.ii.pw.rest;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -156,12 +157,22 @@ public class VentaResourceRESTService {
         File file = new File(filename);
         if (!file.exists()) {
             System.out.println("not exist> " + file.getAbsolutePath());
-            file.createNewFile();
+            if(file.createNewFile()){
+                throw new IOException("Unable to create file");
+            };
         }
-        FileOutputStream fop = new FileOutputStream(file);
-        fop.write(content);
-        fop.flush();
-        fop.close();
+        FileOutputStream fop = null;
+
+        try {
+            fop = new FileOutputStream(file);
+            fop.write(content);
+            fop.flush();
+            fop.close();
+        }finally{
+            if (fop!=null)
+                fop.close();
+        }
+
     }
 
 
@@ -188,7 +199,7 @@ public class VentaResourceRESTService {
                 int tamanoTotalLista = registration.getTamanoLista();   // Total records found for the query
 
                 // Empezar el streaming de datos
-                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os ) ) ) ) {
+                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os, StandardCharsets.UTF_8 ) ) ) ) {
 
                     writer.print( "[" );
 

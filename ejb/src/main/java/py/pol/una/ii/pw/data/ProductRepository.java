@@ -53,7 +53,7 @@ public class ProductRepository {
             sqlSession.close();
         }
     }
-
+//  "name' OR 'a'='a"
     public List<Product> findByNameAndDescription(String name,String descripcion) {
         SqlSession sqlSession = SqlSessionFactoryMyBatis.getSqlSessionFactory().openSession();
         try {

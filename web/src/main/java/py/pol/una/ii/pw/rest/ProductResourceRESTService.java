@@ -127,7 +127,7 @@ public class ProductResourceRESTService {
     @PUT
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Product UpdateProduct(@PathParam("id") long id,Product producto) throws Exception{
+    public Product updateProduct(@PathParam("id") long id,Product producto) throws Exception{
         	validateProduct(producto);
        
         	producto.setId(id);
@@ -140,22 +140,16 @@ public class ProductResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Product DeleteProduct(@PathParam("id") long id) throws Exception{
+    public Product deleteProduct(@PathParam("id") long id) throws Exception{
     	Product producto = repository.findById(id);
-    	try{
-    	
+
     	  if (producto == null) {
               throw new WebApplicationException(Response.Status.NOT_FOUND);
           }
     	
-    	
     	registration.delete(producto);
-    	log.info("Updating " + producto.getName());
-    	}
-    	catch(Exception e){
-    	}
-    	
-    	
+    	log.info("Deleting " + producto.getName());
+
     	return producto;
     	
     }
@@ -183,7 +177,7 @@ public class ProductResourceRESTService {
      * exception so that it can be interpreted separately.
      * </p>
      * 
-     * @param member Member to be validated
+     * @param product Member to be validated
      * @throws ConstraintViolationException If Bean Validation errors exist
      * @throws ValidationException If member with the same email already exists
      */

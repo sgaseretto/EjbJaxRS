@@ -79,18 +79,14 @@ public class VentaNormalResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Venta deleteVentaById(@PathParam("id") long id) {
-        Venta venta = null;
-        try {
-            venta = repository.findById(id);
-            registration.delete(venta);
+    public Venta deleteVentaById(@PathParam("id") long id) throws Exception {
+        Venta venta = repository.findById(id);
+
             if (venta == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
-        } catch (Exception e){
-            log.info(e.toString());
-            venta = null;
-        }
+        registration.delete(venta);
+
         return venta;
     }
 }

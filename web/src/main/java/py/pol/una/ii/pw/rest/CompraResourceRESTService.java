@@ -1,6 +1,8 @@
 package py.pol.una.ii.pw.rest;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -143,12 +145,23 @@ public class CompraResourceRESTService {
          File file = new File(filename);
          if (!file.exists()) {
              System.out.println("not exist> " + file.getAbsolutePath());
-             file.createNewFile();
+             if(file.createNewFile()) {
+                 throw new IOException("Unable to create file");
+             }
          }
-         FileOutputStream fop = new FileOutputStream(file);
-         fop.write(content);
-         fop.flush();
-         fop.close();
+
+         FileOutputStream fop = null;
+
+         try {
+             fop = new FileOutputStream(file);
+             fop.write(content);
+             fop.flush();
+             fop.close();
+         }finally {
+             if(fop!=null)
+                 fop.close();
+         }
+
      }
 
     protected Response.ResponseBuilder getNoCacheResponseBuilder( Response.Status status ) {
@@ -175,7 +188,7 @@ public class CompraResourceRESTService {
                 int tamanoTotalLista = registration.getTamanoLista();   // Total records found for the query
 
                 // Empezar el streaming de datos
-                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os ) ) ) ) {
+                try ( PrintWriter writer = new PrintWriter( new BufferedWriter( new OutputStreamWriter( os, StandardCharsets.UTF_8 ) ) ) ) {
 
                     writer.print( "[" );
                     while ( tamanoTotalLista > 0 ) {
@@ -272,18 +285,15 @@ public class CompraResourceRESTService {
     @DELETE
     @Path("/{id:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Compra deleteCompraById(@PathParam("id") long id) {
-        Compra compra = null;
-    	try {
-        	compra = repository.findById(id);
-        	registration.delete(compra);
+    public Compra deleteCompraById(@PathParam("id") long id) throws Exception {
+        Compra compra = repository.findById(id);
+
             if (compra == null) {
                 throw new WebApplicationException(Response.Status.NOT_FOUND);
             }
-        } catch (Exception e){
-        	log.info(e.toString());
-        	compra = null;
-        }
+        registration.delete(compra);
+        log.info("Deleting " + compra.getId());
+
         return compra;
     }
 }
