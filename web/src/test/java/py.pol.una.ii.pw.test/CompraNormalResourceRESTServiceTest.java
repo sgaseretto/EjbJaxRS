@@ -78,6 +78,7 @@ public class CompraNormalResourceRESTServiceTest {
     private Compra compra = new Compra();
     private ProductoComprado productoComprado = new ProductoComprado();
     private Compra compraAcrear = new Compra();
+    List<Compra> compraList = new ArrayList<Compra>();
 
     @Before
     public void setUp() throws Exception {
@@ -104,7 +105,7 @@ public class CompraNormalResourceRESTServiceTest {
         when(repository.findById(ID_COMPRA)).thenReturn(compra);
         when(repository.findById(ID_COMPRA_NO_EXISTE)).thenReturn(null);
 
-        List<Compra> compraList = new ArrayList<Compra>();
+
         compraList.add(compra);
         when(repository.findAllOrderedByName()).thenReturn(compraList);
 
@@ -134,12 +135,22 @@ public class CompraNormalResourceRESTServiceTest {
     public void listarComprasRetornaOk() throws Exception {
         response = server.newRequest(RESOURCE_PATH).request().get();
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
     }
 
     @Test
     public void obtenerCompraRetornaOk() throws Exception{
         response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID_COMPRA)).request().get();
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response.close();
+    }
+
+    @Test
+    public void obtenerCompraID() throws Exception{
+        response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID_COMPRA)).request().get();
+        Compra objetoRespuesta = response.readEntity(Compra.class);
+        Assert.assertEquals(compra.getId(), objetoRespuesta.getId());
+        response.close();
     }
 
     @Test
@@ -165,11 +176,5 @@ public class CompraNormalResourceRESTServiceTest {
         response = server.newRequest(RESOURCE_PATH +"/" + String.valueOf(ID_COMPRA_NO_EXISTE)).request().buildDelete().invoke();
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
-/*
-    @Test
-    public void datosCompra()  throws Exception{
-        response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID_COMPRA)).request().get();
-        assertEquals(compra, response.getDate());
-    }
-*/
+
 }

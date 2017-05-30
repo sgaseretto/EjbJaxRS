@@ -138,6 +138,13 @@ public class VentaNormalResourceRESTServiceTest {
     }
 
     @Test
+    public void obtenerVentaCustomerName() throws Exception{
+        response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID_VENTA)).request().get();
+        Venta objetoRespuesta = response.readEntity(Venta.class);
+        Assert.assertEquals(venta.getCustomer().getName(), objetoRespuesta.getCustomer().getName());
+    }
+
+    @Test
     public void obtenerCompraRetornaNotFound() throws Exception{
         response = server.newRequest(RESOURCE_PATH +"/" + String.valueOf(ID_VENTA_NO_EXISTE)).request().get();
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());

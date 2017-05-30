@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import py.pol.una.ii.pw.data.PagoRepository;
+import py.pol.una.ii.pw.model.Compra;
 import py.pol.una.ii.pw.model.Customer;
 import py.pol.una.ii.pw.model.Pago;
 import py.pol.una.ii.pw.rest.PagoResourceRESTService;
@@ -119,6 +120,8 @@ public class PagoResourceRESTServiceTest {
     public void obtenerPagoRetornaOk() throws Exception{
         response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID_PAGO)).request().get();
         assertEquals("El pago que desea obtener no existe",Response.Status.OK.getStatusCode(), response.getStatus());
+        Pago objetoRespuesta = response.readEntity(Pago.class);
+        Assert.assertEquals(pago.getId(), objetoRespuesta.getId());
     }
 
     @Test

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import py.pol.una.ii.pw.data.CustomerRepository;
+import py.pol.una.ii.pw.model.Compra;
 import py.pol.una.ii.pw.model.Customer;
 import py.pol.una.ii.pw.rest.CustomerResourceRESTService;
 import py.pol.una.ii.pw.service.CustomerRegistration;
@@ -115,6 +116,14 @@ public class CustomerResourceRESTServiceTest {
         response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID1)).request().get();
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
+
+    @Test
+    public void obtenerCustomerID() throws Exception{
+        response = server.newRequest(RESOURCE_PATH +"/"  + String.valueOf(ID1)).request().get();
+        Customer objetoRespuesta = response.readEntity(Customer.class);
+        Assert.assertEquals(customer.getId(), objetoRespuesta.getId());
+    }
+
 
     @Test
     public void obtenerCustomerRetornaNotFound() throws Exception{
